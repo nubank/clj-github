@@ -7,7 +7,7 @@
 
 (defmacro with-client [[client initial-state] & body]
   `(fake/with-fake-http
-     [#"^https://api.github.com/repos/.*" (mock.core/httpkit-fake-handler {:initial-state initial-state})]
+     [#"^https://api.github.com/repos/.*" (mock.core/httpkit-fake-handler {:initial-state ~initial-state})]
      (let [~client (client/new-client {:token-fn (constantly "token")})]
        ~@body)))
 
