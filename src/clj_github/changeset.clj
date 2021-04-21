@@ -93,16 +93,13 @@
 
 (defn commit!
   "Commits the changeset returning a new changeset based on the new commit revision.
-  If the changeset does not contain any changes, calling this function is a no-op.
   This function does not update the HEAD of a branch."
   [{:keys [client org repo base-revision changes] :as changeset} message]
-  (if (empty? changes)
-    changeset
-    (let [{:keys [sha]} (repository/commit! client org repo base-revision {:message  message
-                                                                           :tree     (changes->tree changes)})]
-      (-> changeset
-          (dissoc :changes)
-          (assoc :base-revision sha)))))
+  (let [{:keys [sha]} (repository/commit! client org repo base-revision {:message  message
+                                                                         :tree     (changes->tree changes)})]
+    (-> changeset
+        (dissoc :changes)
+        (assoc :base-revision sha))))
 
 (defn- branch-ref [branch]
   (format "heads/%s" branch))
