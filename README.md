@@ -5,7 +5,6 @@ Note: while this library is being used for several production use cases, we're s
 
 ## Httpkit client
 
-Useful for non service environments (e.g. cicd pipelines, lambdas, etc).
 
 *Example*:
 ```clojure
