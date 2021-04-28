@@ -41,7 +41,7 @@
           (let [seed-data#       ~seed-data-expr
                 faked-responses# (test-helpers/build-spec (or (:responses seed-data#) []))
                 mocked-handler#  (mock.core/httpkit-fake-handler
-                                  {:initial-state (:initial-state seed-data#)})]
+                                  (select-keys seed-data# [:initial-state]))]
             (concat faked-responses#
                     [#"^https://api.github.com/.*" mocked-handler#])))
         (f#)))
