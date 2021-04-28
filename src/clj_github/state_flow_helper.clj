@@ -32,14 +32,18 @@
 
   This is backed up by `http-kit-fake`, for more details on how to declare requests and responses
   see https://github.com/d11wtq/http-kit-fake."
-  [{:keys [initial-state responses] :or {responses []}} & flows]
+  [seed-data-expr & flows]
   `(state/wrap-with
     (fn [f#]
       (fake/with-fake-http
-        ~(into
+        (into
           []
-          (concat (test-helpers/build-spec responses)
-                  `[#"^https://api.github.com/.*" (mock.core/httpkit-fake-handler {:initial-state ~initial-state})]))
+          (let [seed-data#       ~seed-data-expr
+                faked-responses# (test-helpers/build-spec (or (:responses seed-data#) []))
+                mocked-handler#  (mock.core/httpkit-fake-handler
+                                  (select-keys seed-data# [:initial-state]))]
+            (concat faked-responses#
+                    [#"^https://api.github.com/.*" mocked-handler#])))
         (f#)))
     (flow/flow "mock-github"
                ~@flows)))
