@@ -1,4 +1,4 @@
-(defproject dev.nubank/clj-github "0.1.1"
+(defproject dev.nubank/clj-github "0.2.0"
   :description "A Clojure library for interacting with the github developer API"
   :url "https://github.com/nubank/clj-github"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -16,10 +16,10 @@
   :dependencies [[org.clojure/clojure "1.10.3"]
 
                  [cheshire "5.10.0"]
-                 [clj-commons/clj-yaml "0.7.1"]
-                 [http-kit "2.5.0"]
+                 [clj-commons/clj-yaml "0.7.106"]
+                 [http-kit "2.5.3"]
                  [nubank/clj-github-app "0.1.4"]
-                 [nubank/state-flow "5.10.0"]]
+                 [nubank/state-flow "5.11.3"]]
 
   :cljfmt {:indents {flow       [[:block 1]]
                      assoc-some [[:block 0]]}}
@@ -28,10 +28,10 @@
                    :dependencies [[ch.qos.logback/logback-classic "1.3.0-alpha4" :exclusions [com.sun.mail/javax.mail]]
                                   [org.clojure/test.check "1.1.0"]
                                   [nubank/matcher-combinators "3.1.4" :exclusions [mvxcvi/puget commons-codec]]
-                                  [tortue/spy "2.0.0"]
+                                  [tortue/spy "2.4.0"]
                                   [http-kit.fake "0.2.2"]
-                                  [metosin/reitit-core "0.5.10"]
-                                  [dev.nubank/clj-github-mock "0.1.0"]]}}
+                                  [metosin/reitit-core "0.5.13"]
+                                  [dev.nubank/clj-github-mock "0.2.0"]]}}
 
   :aliases {"coverage" ["cloverage" "-s" "coverage"]
             "lint"     ["do" ["cljfmt" "check"] ["nsorg"]]
