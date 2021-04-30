@@ -20,10 +20,19 @@
       (assoc-in [:headers "Content-Type"] "application/json")
       (assoc-in [:headers "Authorization"] (str "Bearer " (token-fn)))))
 
+(defn- parse-body [content-type body]
+  (if (and content-type (re-find #"application/json" content-type))
+    (cheshire/parse-string body true)
+    body))
+
+(defn- content-type [response]
+  (or (get-in response [:headers :content-type])
+      (get-in response [:headers "Content-Type"])))
+
 (defn request [client req-map]
   (let [response @(httpkit/request (prepare client req-map))]
     (if (success-codes (:status response))
-      (update response :body cheshire/parse-string true)
+      (update response :body (partial parse-body (content-type response)))
       (throw (ex-info "Request to GitHub failed" {:response response})))))
 
 (defn new-client [{:keys [app-id private-key token org] :as opts}]
