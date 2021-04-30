@@ -24,7 +24,7 @@
   (let [response @(httpkit/request (prepare client req-map))]
     (if (success-codes (:status response))
       (update response :body cheshire/parse-string true)
-      (throw (ex-info "Request to GitHub failed" {:response response})))))
+      (throw (ex-info "Request to GitHub failed" (select-keys response [:status :body]))))))
 
 (defn new-client [{:keys [app-id private-key token org] :as opts}]
   (cond
