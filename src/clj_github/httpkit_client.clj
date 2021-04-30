@@ -33,7 +33,7 @@
   (let [response @(httpkit/request (prepare client req-map))]
     (if (success-codes (:status response))
       (update response :body (partial parse-body (content-type response)))
-      (throw (ex-info "Request to GitHub failed" {:response response})))))
+      (throw (ex-info "Request to GitHub failed" {:response (select-keys response [:status :body]))))))
 
 (defn new-client [{:keys [app-id private-key token org] :as opts}]
   (cond
