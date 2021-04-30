@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.1
+- Avoid that exceptions leak token
+
 ## 0.2.0
 - Bump some libs
 
