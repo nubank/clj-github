@@ -18,7 +18,10 @@
 
   Note: The internal format of the changeset is considered an implementation detail and should not be relied upon.
   Always create a changeset using one of the factory functions (e.g. `from-revision`, `from-branch`)."
-  (:require [clj-github.repository :as repository]))
+  (:require [clj-github.repository :as repository]
+            [clojure.java.io :as io])
+  (:import [java.util.zip ZipInputStream]
+           [java.io ByteArrayOutputStream]))
 
 (defn orphan [client org repo]
   {:client client
@@ -74,6 +77,47 @@
   "Returns a new changeset with the file under path deleted."
   [revision path]
   (assoc-in revision [:changes path] ::deleted))
+
+(defn- slurp-entry [zip-input-stream]
+  (with-open [out (ByteArrayOutputStream.)]
+    (io/copy zip-input-stream out)
+    (String. (.toByteArray out) "UTF-8")))
+
+; TODO how to deal with binary files
+(defn- zip-entry [zip-input-stream]
+  (when-let [entry (.getNextEntry zip-input-stream)]
+    {:directory? (.isDirectory entry)
+     :name (.getName entry)
+     :content (when (not (.isDirectory entry))
+                (slurp-entry zip-input-stream))}))
+
+(defn- zip-seq [zip-input-stream]
+  (lazy-seq
+   (if-let [entry (zip-entry zip-input-stream)]
+     (cons entry (zip-seq zip-input-stream))
+     [])))
+
+(defn- zip-input-stream [input-stream]
+  (ZipInputStream. input-stream))
+
+(defn visit
+  "Visit all files in the repository. Receives a visitor function as argument. This must be a
+  one arity function that receives for each file a map with the following attributes:
+  - `:path`: the path of the file
+  - `:content`: the content of the file
+  The function should return the new content of the file, the same content if the files is not
+  to be changed, or nil if the file is to be deleted.
+  Returns a new changeset containing all the changes returned by the visitor.
+
+  Note: This function loads the entire content of the revision into memory."
+  [changeset visitor])
+
+(defn visit-fs
+  "Copy the content of the files to a temporary directory in the filesystem and calls visitor
+  passing a java.io.File object pointing to the directory. This function is specially useful
+  if one wants to use an external program to make the changes.
+  Returns a new changeset containing any change made by the visitor to the directory."
+  [changeset visitor])
 
 (defn dirty?
   "Returns true if changes were made to the given changeset"
