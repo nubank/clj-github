@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.2
+- Fix breaking change in exception result
+
 ## 0.2.1
 - Avoid that exceptions leak token
 
