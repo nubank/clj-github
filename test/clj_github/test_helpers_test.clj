@@ -7,16 +7,16 @@
 (deftest with-fake-github-test
   (let [client (httpkit-client/new-client {:token-fn (fn [] "token")})]
     (testing "it appends github url when request is a string"
-      (is (match? {:body {}}
-                  (sut/with-fake-github ["/api/repos" "{}"]
+      (is (match? {:status 200}
+                  (sut/with-fake-github ["/api/repos" {:status 200}]
                     (httpkit-client/request client {:path "/api/repos"})))))
     (testing "it supports a path attribute in a request map"
-      (is (match? {:body {}}
-                  (sut/with-fake-github [{:path "/api/repos"} "{}"]
+      (is (match? {:status 200} 
+                  (sut/with-fake-github [{:path "/api/repos"} {:status 200}]
                     (httpkit-client/request client {:path "/api/repos"})))))
     (testing "it supports regexes"
-      (is (match? {:body {}}
-                  (sut/with-fake-github [#"/api/repos" "{}"]
+      (is (match? {:status 200} 
+                  (sut/with-fake-github [#"/api/repos" {:status 200}]
                     (httpkit-client/request client {:path "/api/repos"})))))
 
     (testing "it supports functions as request spec"
@@ -25,14 +25,14 @@
             request-fn-with-arg (fn [url-regex]
                                   (fn [request]
                                     (re-find url-regex (:url request))))]
-        (is (match? {:body {}}
+        (is (match? {:status 200} 
                     (sut/with-fake-github ["/other" "{}"
-                                           (request-fn-with-arg #"/api/whatever") {:body "{}"}]
+                                           (request-fn-with-arg #"/api/whatever") {:status 200}]
                       (httpkit-client/request client {:path "/other"})
                       (httpkit-client/request client {:path "/api/whatever"}))))
 
-        (is (match? {:body {}}
+        (is (match? {:status 200}
                     (sut/with-fake-github ["/other" "{}"
-                                           request-fn {:body "{}"}]
+                                           request-fn {:status 200}]
                       (httpkit-client/request client {:path "/other"})
                       (httpkit-client/request client {:path "/api/repos"}))))))))
