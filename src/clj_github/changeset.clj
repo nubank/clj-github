@@ -19,7 +19,9 @@
   Note: The internal format of the changeset is considered an implementation detail and should not be relied upon.
   Always create a changeset using one of the factory functions (e.g. `from-revision`, `from-branch`)."
   (:require [clj-github.repository :as repository]
-            [clojure.java.io :as io])
+            [clj-github.httpkit-client :as github]
+            [clojure.java.io :as io]
+            [clojure.string :as string])
   (:import [java.util.zip ZipInputStream]
            [java.io ByteArrayOutputStream]))
 
@@ -83,11 +85,18 @@
     (io/copy zip-input-stream out)
     (String. (.toByteArray out) "UTF-8")))
 
+(defn- path [entry]
+  (->>
+   (string/split (.getName entry) #"/")
+   rest
+   rest ; TODO fix mock not to return a / at the begining
+   (string/join "/")))
+
 ; TODO how to deal with binary files
 (defn- zip-entry [zip-input-stream]
   (when-let [entry (.getNextEntry zip-input-stream)]
     {:directory? (.isDirectory entry)
-     :name (.getName entry)
+     :path (path entry)
      :content (when (not (.isDirectory entry))
                 (slurp-entry zip-input-stream))}))
 
@@ -100,6 +109,14 @@
 (defn- zip-input-stream [input-stream]
   (ZipInputStream. input-stream))
 
+(defn- changeset-visitor [visitor]
+  (fn [changeset {:keys [path content] :as file}]
+    (let [new-content (visitor file)]
+      (cond
+        (not= content new-content) (put-content changeset path new-content)
+        (nil? new-content) (delete changeset path)
+        :else changeset))))
+
 (defn visit
   "Visit all files in the repository. Receives a visitor function as argument. This must be a
   one arity function that receives for each file a map with the following attributes:
@@ -110,7 +127,13 @@
   Returns a new changeset containing all the changes returned by the visitor.
 
   Note: This function loads the entire content of the revision into memory."
-  [changeset visitor])
+  [{:keys [client org repo base-revision] :as changeset} visitor]
+  (->> (github/request client {:path (format "/repos/%s/%s/zipball/%s" org repo base-revision)})
+       :body
+       zip-input-stream
+       zip-seq
+       (remove :directory?)
+       (reduce (changeset-visitor visitor) changeset)))
 
 (defn visit-fs
   "Copy the content of the files to a temporary directory in the filesystem and calls visitor

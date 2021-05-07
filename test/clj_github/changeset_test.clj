@@ -43,3 +43,19 @@
       (is (nil? (-> (sut/from-branch! client "nubank" "repo" "master")
                     (sut/delete "file")
                     (sut/get-content "file")))))))
+
+(deftest visit-test
+  (testing "it changes the content of a file"
+    (with-client [client initial-state]
+      (-> (sut/orphan client "nubank" "repo")
+          (sut/put-content "file" "content")
+          (sut/commit! "initial commit")
+          (sut/create-branch! "master"))
+      (-> (sut/from-branch! client "nubank" "repo" "master")
+          (sut/visit (fn [{:keys [content]}]
+                       (str "changed " content)))
+          (sut/commit! "change")
+          (sut/update-branch!))
+      (is (= "changed content"
+             (-> (sut/from-branch! client "nubank" "repo" "master")
+                 (sut/get-content "file")))))))

@@ -31,7 +31,7 @@
                                   [tortue/spy "2.4.0"]
                                   [http-kit.fake "0.2.2"]
                                   [metosin/reitit-core "0.5.13"]
-                                  [dev.nubank/clj-github-mock "0.2.0"]]}}
+                                  [dev.nubank/clj-github-mock "0.3.0-SNAPSHOT"]]}}
 
   :aliases {"coverage" ["cloverage" "-s" "coverage"]
             "lint"     ["do" ["cljfmt" "check"] ["nsorg"]]
