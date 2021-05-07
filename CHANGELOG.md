@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.0
+- Support content types other than json
+
 ## 0.2.2
 - Fix breaking change in exception result
 
