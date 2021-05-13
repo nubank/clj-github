@@ -21,9 +21,12 @@
   (:require [clj-github.repository :as repository]
             [clj-github.httpkit-client :as github]
             [clojure.java.io :as io]
-            [clojure.string :as string])
+            [clojure.string :as string]
+            [clj-jgit.porcelain :as git])
   (:import [java.util.zip ZipInputStream]
-           [java.io ByteArrayOutputStream]))
+           [java.io ByteArrayOutputStream]
+           [java.nio.file Files]
+           [java.nio.file.attribute FileAttribute]))
 
 (defn orphan [client org repo]
   {:client client
@@ -117,6 +120,9 @@
         (nil? new-content) (delete changeset path)
         :else changeset))))
 
+(defn- get-zipball! [{:keys [client org repo base-revision]}]
+  (:body (github/request client {:path (format "/repos/%s/%s/zipball/%s" org repo base-revision)})))
+
 (defn visit
   "Visit all files in the repository. Receives a visitor function as argument. This must be a
   one arity function that receives for each file a map with the following attributes:
@@ -127,20 +133,49 @@
   Returns a new changeset containing all the changes returned by the visitor.
 
   Note: This function loads the entire content of the revision into memory."
-  [{:keys [client org repo base-revision] :as changeset} visitor]
-  (->> (github/request client {:path (format "/repos/%s/%s/zipball/%s" org repo base-revision)})
-       :body
+  [changeset visitor]
+  (->> (get-zipball! changeset)
        zip-input-stream
        zip-seq
        (remove :directory?)
        (reduce (changeset-visitor visitor) changeset)))
+
+(defn- unzip
+  "Unzips zip archive filename and write all contents to dir output-parent"
+  [input-stream output-parent]
+  (with-open [input (ZipInputStream. input-stream)]
+    (loop [entry (.getNextEntry input)]
+      (when entry
+        (when (not (.isDirectory entry))
+          (do
+            (.mkdirs (.getParentFile (io/file (str output-parent (.getName entry)))))
+            (let [output (io/output-stream (str output-parent (.getName entry)))]
+              (io/copy input output)
+              (.close output))))
+        (recur (.getNextEntry input))))
+    (.closeEntry input)))
 
 (defn visit-fs
   "Copy the content of the files to a temporary directory in the filesystem and calls visitor
   passing a java.io.File object pointing to the directory. This function is specially useful
   if one wants to use an external program to make the changes.
   Returns a new changeset containing any change made by the visitor to the directory."
-  [changeset visitor])
+  [{:keys [org repo base-revision] :as changeset} visitor]
+  (let [is (get-zipball! changeset)
+        temp-dir (.toFile (Files/createTempDirectory "clj-github" (into-array FileAttribute [])))
+        working-dir (doto (io/file temp-dir (str org "-" repo "-" base-revision))
+                      (.mkdirs))
+        _ (unzip is temp-dir)
+        repo (git/git-init :dir working-dir)]
+    (git/git-add repo ".")
+    (git/git-commit repo "base commit")
+    (visitor working-dir)
+    (git/git-add repo ".")
+    (reduce (fn [cs file]
+              (put-content cs file (slurp (io/file working-dir file))))
+            changeset
+            (:changed (git/git-status repo)))))
+
 
 (defn dirty?
   "Returns true if changes were made to the given changeset"
