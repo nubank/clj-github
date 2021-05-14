@@ -140,6 +140,14 @@
        (remove :directory?)
        (reduce (changeset-visitor visitor) changeset)))
 
+; TODO fix mock not to return / at the begining
+(defn- remove-slash [s]
+  (if (= \/ (first s))
+    (string/replace-first s #"/" "")
+    s))
+
+(remove-slash "abc/def")
+
 (defn- unzip
   "Unzips zip archive filename and write all contents to dir output-parent"
   [input-stream output-parent]
@@ -147,9 +155,9 @@
     (loop [entry (.getNextEntry input)]
       (when entry
         (when (not (.isDirectory entry))
-          (do
-            (.mkdirs (.getParentFile (io/file output-parent (.getName entry))))
-            (let [output (io/output-stream (io/file output-parent (.getName entry)))]
+          (let [file (io/file output-parent (remove-slash (.getName entry)))]
+            (.mkdirs (.getParentFile file))
+            (let [output (io/output-stream file)]
               (io/copy input output)
               (.close output))))
         (recur (.getNextEntry input))))
@@ -161,18 +169,25 @@
       (delete-dir file)))
   (io/delete-file dir))
 
+(defn- apply-changes [dir changes]
+  (doseq [[path content] changes]
+    (case content
+      :deleted (io/delete-file (io/file dir path))
+      (spit (io/file dir path) content))))
+
 (defn visit-fs
   "Copy the content of the files to a temporary directory in the filesystem and calls visitor
   passing a java.io.File object pointing to the directory. This function is specially useful
   if one wants to use an external program to make the changes.
   Returns a new changeset containing any change made by the visitor to the directory."
-  [{:keys [org repo base-revision] :as changeset} visitor]
+  [{:keys [org repo base-revision changes] :as changeset} visitor]
   (let [is (get-zipball! changeset)
         temp-dir (.toFile (Files/createTempDirectory "clj-github" (into-array FileAttribute [])))
         working-dir (doto (io/file temp-dir (str org "-" repo "-" base-revision))
                       (.mkdirs))
         _ (unzip is temp-dir)
         repo (git/git-init :dir working-dir)]
+    (apply-changes working-dir changes)
     (git/git-add repo ".")
     (git/git-commit repo "base commit")
     (visitor working-dir)

@@ -105,4 +105,21 @@
           (sut/commit! "change")
           (sut/update-branch!))
       (is (nil? (-> (sut/from-branch! client "nubank" "repo" "master")
-                    (sut/get-content "file")))))))
+                    (sut/get-content "file"))))))
+  (testing "it preserves previous changes"
+    (with-client [client initial-state]
+      (-> (sut/orphan client "nubank" "repo")
+          (sut/put-content "file" "content")
+          (sut/commit! "initial commit")
+          (sut/create-branch! "master"))
+      (-> (sut/from-branch! client "nubank" "repo" "master")
+          (sut/put-content "file" "changed content")
+          (sut/visit-fs (fn [dir]
+                          (let [file (io/file dir "file")
+                                content (slurp file)]
+                            (spit file (str "more " content)))))
+          (sut/commit! "change")
+          (sut/update-branch!))
+      (is (= "more changed content"
+             (-> (sut/from-branch! client "nubank" "repo" "master")
+                 (sut/get-content "file")))))))
