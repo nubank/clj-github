@@ -155,6 +155,12 @@
         (recur (.getNextEntry input))))
     (.closeEntry input)))
 
+(defn- delete-dir [dir]
+  (when (.isDirectory dir)
+    (doseq [file (.listFiles dir)]
+      (delete-dir file)))
+  (io/delete-file dir))
+
 (defn visit-fs
   "Copy the content of the files to a temporary directory in the filesystem and calls visitor
   passing a java.io.File object pointing to the directory. This function is specially useful
@@ -172,16 +178,19 @@
     (visitor working-dir)
     (git/git-add repo ".")
     (git/git-rm repo ".")
-    (as-> (reduce (fn [cs file]
-                    (put-content cs file (slurp (io/file working-dir file))))
-                  changeset
-                  (concat
-                   (:changed (git/git-status repo))
-                   (:added (git/git-status repo))))
+    (try
+      (as-> (reduce (fn [cs file]
+                      (put-content cs file (slurp (io/file working-dir file))))
+                    changeset
+                    (concat
+                     (:changed (git/git-status repo))
+                     (:added (git/git-status repo))))
           $ (reduce (fn [cs file]
                       (delete cs file))
                     $
-                    (:missing (git/git-status repo))))))
+                    (:missing (git/git-status repo))))
+      (finally
+        (delete-dir temp-dir)))))
 
 (defn dirty?
   "Returns true if changes were made to the given changeset"
