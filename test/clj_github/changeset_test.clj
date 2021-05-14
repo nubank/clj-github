@@ -76,4 +76,33 @@
           (sut/update-branch!))
       (is (= "changed content"
              (-> (sut/from-branch! client "nubank" "repo" "master")
-                 (sut/get-content "file")))))))
+                 (sut/get-content "file"))))))
+  (testing "it adds new files"
+    (with-client [client initial-state]
+      (-> (sut/orphan client "nubank" "repo")
+          (sut/put-content "file" "content")
+          (sut/commit! "initial commit")
+          (sut/create-branch! "master"))
+      (-> (sut/from-branch! client "nubank" "repo" "master")
+          (sut/visit-fs (fn [dir]
+                          (let [file (io/file dir "new-file")]
+                            (spit file "new content"))))
+          (sut/commit! "change")
+          (sut/update-branch!))
+      (is (= "new content"
+             (-> (sut/from-branch! client "nubank" "repo" "master")
+                 (sut/get-content "new-file"))))))
+  (testing "it deletes a file"
+    (with-client [client initial-state]
+      (-> (sut/orphan client "nubank" "repo")
+          (sut/put-content "file" "content")
+          (sut/commit! "initial commit")
+          (sut/create-branch! "master"))
+      (-> (sut/from-branch! client "nubank" "repo" "master")
+          (sut/visit-fs (fn [dir]
+                          (let [file (io/file dir "file")]
+                            (.delete file))))
+          (sut/commit! "change")
+          (sut/update-branch!))
+      (is (nil? (-> (sut/from-branch! client "nubank" "repo" "master")
+                    (sut/get-content "file")))))))

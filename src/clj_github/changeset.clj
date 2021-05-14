@@ -171,11 +171,17 @@
     (git/git-commit repo "base commit")
     (visitor working-dir)
     (git/git-add repo ".")
-    (reduce (fn [cs file]
-              (put-content cs file (slurp (io/file working-dir file))))
-            changeset
-            (:changed (git/git-status repo)))))
-
+    (git/git-rm repo ".")
+    (as-> (reduce (fn [cs file]
+                    (put-content cs file (slurp (io/file working-dir file))))
+                  changeset
+                  (concat
+                   (:changed (git/git-status repo))
+                   (:added (git/git-status repo))))
+          $ (reduce (fn [cs file]
+                      (delete cs file))
+                    $
+                    (:missing (git/git-status repo))))))
 
 (defn dirty?
   "Returns true if changes were made to the given changeset"
