@@ -112,9 +112,17 @@
 (defn- zip-input-stream [input-stream]
   (ZipInputStream. input-stream))
 
+(defn- apply-change [{:keys [changes]} {:keys [path] :as file}]
+  (if-let [change (and changes (changes path))]
+    (case change
+      :deleted nil
+      (assoc file :content change))
+    file))
+
 (defn- changeset-visitor [visitor]
   (fn [changeset {:keys [path content] :as file}]
-    (let [new-content (visitor file)]
+    (let [file' (apply-change changeset file)
+          new-content (when file' (visitor file'))]
       (cond
         (not= content new-content) (put-content changeset path new-content)
         (nil? new-content) (delete changeset path)
