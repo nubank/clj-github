@@ -148,8 +148,8 @@
       (when entry
         (when (not (.isDirectory entry))
           (do
-            (.mkdirs (.getParentFile (io/file (str output-parent (.getName entry)))))
-            (let [output (io/output-stream (str output-parent (.getName entry)))]
+            (.mkdirs (.getParentFile (io/file output-parent (.getName entry))))
+            (let [output (io/output-stream (io/file output-parent (.getName entry)))]
               (io/copy input output)
               (.close output))))
         (recur (.getNextEntry input))))
