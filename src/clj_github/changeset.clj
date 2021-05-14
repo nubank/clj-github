@@ -146,8 +146,6 @@
     (string/replace-first s #"/" "")
     s))
 
-(remove-slash "abc/def")
-
 (defn- unzip
   "Unzips zip archive filename and write all contents to dir output-parent"
   [input-stream output-parent]
