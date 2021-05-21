@@ -92,7 +92,6 @@
   (->>
    (string/split (.getName entry) #"/")
    rest
-   rest ; TODO fix mock not to return a / at the begining
    (string/join "/")))
 
 ; TODO how to deal with binary files
@@ -148,12 +147,6 @@
        (remove :directory?)
        (reduce (changeset-visitor visitor) changeset)))
 
-; TODO fix mock not to return / at the begining
-(defn- remove-slash [s]
-  (if (= \/ (first s))
-    (string/replace-first s #"/" "")
-    s))
-
 (defn- unzip
   "Unzips zip archive filename and write all contents to dir output-parent"
   [input-stream output-parent]
@@ -161,7 +154,7 @@
     (loop [entry (.getNextEntry input)]
       (when entry
         (when (not (.isDirectory entry))
-          (let [file (io/file output-parent (remove-slash (.getName entry)))]
+          (let [file (io/file output-parent (.getName entry))]
             (.mkdirs (.getParentFile file))
             (let [output (io/output-stream file)]
               (io/copy input output)
