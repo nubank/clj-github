@@ -1,8 +1,11 @@
 (ns clj-github.repository
   "Provides auxiliary functions to work with repositories via github api."
-  (:require [clojure.string :as string]
+  (:require [clj-github.client-utils :refer [fetch-body!]]
             [clj-github.httpkit-client :as client]
-            [clj-github.client-utils :refer [fetch-body!]])
+            [clojure.java.io :as io]
+            [clojure.string :as string]
+            [me.raynes.fs :as fs]
+            [me.raynes.fs.compression :as fs-compression])
   (:import [clojure.lang ExceptionInfo]
            [java.util Base64]))
 
@@ -195,3 +198,23 @@
     (fetch-body! client {:path   url
                          :method :put
                          :body   params})))
+
+(defn clone
+  "Download github repository and put content on destination path"
+  ([client org repo dest]
+   (clone client org repo "master" dest))
+  ([client org repo tag dest]
+   (let [clone-path "/tmp/clone-repo/"
+         url (format "/repos/%/%/zipball/%" org repo tag)
+         git-response (client/request client {:path   url
+                                              :method :get
+                                              :as     :byte-array})
+         filename (->> git-response :headers :content-disposition (re-find #"filename=(.*).zip") second)]
+     (fs/mkdir clone-path)
+     (-> git-response
+         :body
+         (io/input-stream)
+         (clojure.java.io/copy (clojure.java.io/file (str clone-path "git-response.zip"))))
+     (fs-compression/unzip (str clone-path "git-response.zip") clone-path)
+     (fs/move (str clone-path filename) dest)
+     (fs/delete-dir clone-path))))
