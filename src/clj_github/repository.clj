@@ -204,17 +204,15 @@
   ([client org repo dest]
    (clone client org repo "master" dest))
   ([client org repo tag dest]
-   (let [clone-path "/tmp/clone-repo/"
-         url (format "/repos/%/%/zipball/%" org repo tag)
+   (let [clone-path (str (fs/temp-dir "clone-repo") "/")
+         url (format "/repos/%s/%s/zipball/%s" org repo tag)
          git-response (client/request client {:path   url
                                               :method :get
                                               :as     :byte-array})
          filename (->> git-response :headers :content-disposition (re-find #"filename=(.*).zip") second)]
-     (fs/mkdir clone-path)
      (-> git-response
          :body
          (io/input-stream)
-         (io/copy (io/file (str clone-path "git-response.zip"))))
+         (io/copy (io/file clone-path "git-response.zip")))
      (fs-compression/unzip (str clone-path "git-response.zip") clone-path)
-     (fs/move (str clone-path filename) dest)
-     (fs/delete-dir clone-path))))
+     (fs/move (str clone-path filename) dest))))
