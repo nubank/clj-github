@@ -214,7 +214,7 @@
      (-> git-response
          :body
          (io/input-stream)
-         (clojure.java.io/copy (clojure.java.io/file (str clone-path "git-response.zip"))))
+         (io/copy (io/file (str clone-path "git-response.zip"))))
      (fs-compression/unzip (str clone-path "git-response.zip") clone-path)
      (fs/move (str clone-path filename) dest)
      (fs/delete-dir clone-path))))
