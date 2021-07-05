@@ -200,7 +200,7 @@
                          :body   params})))
 
 (defn clone
-  "Download github repository and put content on destination path.
+  "Download github repository and put its content on a temporary dir. Returns the path of the temporary dir.
 
   For details about the parameters and response format, look at https://docs.github.com/en/rest/reference/repos#download-a-repository-archive-zip."
   ([client org repo]
