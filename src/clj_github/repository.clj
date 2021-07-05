@@ -203,18 +203,19 @@
   "Download github repository and put content on destination path.
 
   For details about the parameters and response format, look at https://docs.github.com/en/rest/reference/repos#download-a-repository-archive-zip."
-  ([client org repo dest]
-   (clone client org repo "" dest))
-  ([client org repo ref dest]
-   (let [clone-path (str (fs/temp-dir "clone-repo") "/")
+  ([client org repo]
+   (clone client org repo ""))
+  ([client org repo ref]
+   (let [clone-path (fs/temp-dir "clone-repo")
          url (format "/repos/%s/%s/zipball/%s" org repo ref)
          git-response (client/request client {:path   url
                                               :method :get
                                               :as     :byte-array})
-         filename (->> git-response :headers :content-disposition (re-find #"filename=(.*).zip") second)]
+         filename (->> git-response :headers :content-disposition (re-find #"filename=(.*).zip") second)
+         repo-path (format "%s/%s" clone-path filename)]
      (-> git-response
          :body
          (io/input-stream)
          (io/copy (io/file clone-path "git-response.zip")))
-     (fs-compression/unzip (str clone-path "git-response.zip") clone-path)
-     (fs/move (str clone-path filename) dest))))
+     (fs-compression/unzip (str clone-path "/git-response.zip") clone-path)
+     repo-path)))
