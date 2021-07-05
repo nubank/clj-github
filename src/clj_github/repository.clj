@@ -202,7 +202,7 @@
 (defn clone
   "Download github repository and put content on destination path"
   ([client org repo dest]
-   (clone client org repo "master" dest))
+   (clone client org repo "" dest))
   ([client org repo tag dest]
    (let [clone-path (str (fs/temp-dir "clone-repo") "/")
          url (format "/repos/%s/%s/zipball/%s" org repo tag)
