@@ -4,6 +4,7 @@
             [clj-github.httpkit-client :as client]
             [clojure.java.io :as io]
             [clojure.string :as string]
+            [clojure.string :as str]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as fs-compression])
   (:import [clojure.lang ExceptionInfo]
@@ -199,6 +200,13 @@
                          :method :put
                          :body   params})))
 
+(defn find-repo-path
+  [clone-path]
+  (->> (fs/list-dir clone-path)
+       (map str)
+       (remove #(str/ends-with? % ".zip"))
+       first))
+
 (defn clone
   "Download github repository and put its content on a temporary dir. Returns the path of the temporary dir.
 
@@ -210,12 +218,10 @@
          url (format "/repos/%s/%s/zipball/%s" org repo ref)
          git-response (client/request client {:path   url
                                               :method :get
-                                              :as     :byte-array})
-         filename (->> git-response :headers :content-disposition (re-find #"filename=(.*).zip") second)
-         repo-path (format "%s/%s" clone-path filename)]
+                                              :as     :byte-array})]
      (-> git-response
          :body
          (io/input-stream)
          (io/copy (io/file clone-path "git-response.zip")))
      (fs-compression/unzip (str clone-path "/git-response.zip") clone-path)
-     repo-path)))
+     (find-repo-path clone-path))))
