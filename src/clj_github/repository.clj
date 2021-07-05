@@ -205,9 +205,9 @@
   For details about the parameters and response format, look at https://docs.github.com/en/rest/reference/repos#download-a-repository-archive-zip."
   ([client org repo dest]
    (clone client org repo "" dest))
-  ([client org repo tag dest]
+  ([client org repo ref dest]
    (let [clone-path (str (fs/temp-dir "clone-repo") "/")
-         url (format "/repos/%s/%s/zipball/%s" org repo tag)
+         url (format "/repos/%s/%s/zipball/%s" org repo ref)
          git-response (client/request client {:path   url
                                               :method :get
                                               :as     :byte-array})
