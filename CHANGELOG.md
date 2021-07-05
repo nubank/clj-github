@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.0
+- Add function that downloads repository content 
+
 ## 0.3.0
 - Support content types other than json
 
