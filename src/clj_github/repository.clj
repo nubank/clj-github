@@ -200,7 +200,7 @@
                          :method :put
                          :body   params})))
 
-(defn find-repo-path
+(defn- find-repo-path
   [clone-path]
   (->> (fs/list-dir clone-path)
        (map str)
