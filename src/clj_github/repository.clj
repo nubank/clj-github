@@ -200,7 +200,9 @@
                          :body   params})))
 
 (defn clone
-  "Download github repository and put content on destination path"
+  "Download github repository and put content on destination path.
+
+  For details about the parameters and response format, look at https://docs.github.com/en/rest/reference/repos#download-a-repository-archive-zip."
   ([client org repo dest]
    (clone client org repo "" dest))
   ([client org repo tag dest]
