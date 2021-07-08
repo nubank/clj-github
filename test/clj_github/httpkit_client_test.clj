@@ -31,5 +31,16 @@
         (is (match? {:status 200} (sut/request client {})))))
     (testing "it throws an exception when status code is not succesful"
       (with-fake-http [{} {:status 400}]
-        (is (thrown? clojure.lang.ExceptionInfo #"Request to GitHub failed"
-                     (sut/request client {})))))))
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo #"(?i)Request to GitHub failed"
+                              (sut/request client {})))))
+    ;; in case of lower level errors, e.g. DNS lookup failue there will not be a status code
+    (testing "it throws an exception when there is no status code"
+      (with-fake-http [{} {:status nil}]
+        (is (thrown-with-msg? clojure.lang.ExceptionInfo #"(?i)Request to GitHub failed"
+                              (sut/request client {})))))
+    (testing "it throws an exception with the root cause"
+      (let [cause (Exception. "Exception for testing purpose")]
+        (with-fake-http [{} {:error cause :status nil}]
+          (let [e (try (sut/request client {}) (catch Exception e e))]
+            (is (re-matches #"(?i)Request to GitHub failed" (.getMessage e)))
+            (is (= cause (.getCause e)))))))))
