@@ -24,6 +24,10 @@
       (with-fake-http [{:url "https://api.github.com/path"}
                        {:status 200}]
         (is (match? {:status 200} (sut/request client {:path "/path"})))))
+    (testing "path is appended to url with optional slash"
+      (with-fake-http [{:url "https://api.github.com/path"}
+                       {:status 200}]
+        (is (match? {:status 200} (sut/request client {:path "path"})))))
     (testing "github token is added to authorization header"
       (with-fake-http [{:headers {"Authorization" "Bearer token"
                                   "Content-Type" "application/json"}}
