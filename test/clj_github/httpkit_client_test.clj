@@ -47,4 +47,28 @@
         (with-fake-http [{} {:error cause :status nil}]
           (let [e (try (sut/request client {}) (catch Exception e e))]
             (is (re-matches #"(?i)Request to GitHub failed" (.getMessage e)))
-            (is (= cause (.getCause e)))))))))
+            (is (= cause (.getCause e)))))))
+    (testing "request headers"
+      (testing "Can use custom headers"
+        (with-fake-http [(fn [req]
+                           (is (= "test" (get-in req [:headers "Test-Header"]))))
+                         {:status 200}]
+          ;; assertion is in fake http callback
+          (sut/request client {:headers {"Test-Header" "test"}})))
+      (testing "Can override authentication"
+        ;; clj-github sets authorization header unless specified. Beware that the
+        ;; implementation here is case sensitive whereas HTTP headers are not.
+        (with-fake-http [(fn [req]
+                           (is (= "Test SomeValue" (get-in req [:headers "Authorization"]))))
+                         {:status 200}]
+          ;; assertion is in fake http callback
+          (sut/request client {:headers {"Authorization" "Test SomeValue"}})))
+      (testing "Can override content-type"
+        ;; clj-github sets the content-type header unless specified. Beware that the
+        ;; implementation here is case sensitive whereas HTTP headers are not.
+        (with-fake-http [(fn [req]
+                           (is (= "test/test" (get-in req [:headers "Content-Type"]))))
+                         {:status 200}]
+          ;; assertion is in fake http callback
+          (sut/request client {:headers {"Content-Type" "test/test"}}))))))
+

@@ -22,8 +22,9 @@
       (assoc :method method)
       (assoc-some :body (and body (cheshire/generate-string body)))
       (assoc :url (append-url-path github-url path))
-      (assoc-in [:headers "Content-Type"] "application/json")
-      (assoc-in [:headers "Authorization"] (str "Bearer " (token-fn)))))
+      ;; TODO http headers are case insensitive, also this could be keywords
+      (update-in [:headers "Content-Type"] #(or % "application/json"))
+      (update-in [:headers "Authorization"] #(or % (str "Bearer " (token-fn))))))
 
 (defn- parse-body [content-type body]
   (if (and content-type (re-find #"application/json" content-type))
@@ -43,7 +44,8 @@
                       {:response (select-keys response [:status :body])}
                       (:error response))))))
 
-(defn new-client [{:keys [app-id private-key token org] :as opts}]
+(defn new-client [{:keys [app-id private-key token org token-fn] :as opts}]
+  {:pre [(or token app-id token-fn)]}
   (cond
     token
     {:token-fn (constantly token)}
