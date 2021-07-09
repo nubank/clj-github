@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2
+
+- Join path with baseurl using a `/` where necessary
+- Allow to specify the Content-Type and Authorization request headers manually
+
 ## 0.4.1
 
 - Include httpkit error in exception when available

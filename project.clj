@@ -1,4 +1,4 @@
-(defproject dev.nubank/clj-github "0.4.1"
+(defproject dev.nubank/clj-github "0.4.2"
   :description "A Clojure library for interacting with the github developer API"
   :url "https://github.com/nubank/clj-github"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
