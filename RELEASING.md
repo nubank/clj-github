@@ -1,9 +1,9 @@
 # Releasing
 
-Anybody with write access to this repository can release a new version and deploy it to Clojars. To do this, first make sure your local master is sync'd with master on github:
+Anybody with write access to this repository can release a new version and deploy it to Clojars. To do this, first make sure your local main branch is sync'd with main on github:
 
 ```bash
-git checkout master
+git checkout main
 git pull
 ```
 
@@ -18,5 +18,7 @@ Clojars.
 
 ### Credentials
 
-Credentials are configured as github secrets: `CLOJARS_USERNAME` and
-`CLOJARS_PASSWD`.
+There is a [github secret][ghsecret] named `CLOJARS_DEPLOY_TOKEN` that contains a [clojars token][clojars_token].
+
+[ghsecret]: https://github.com/nubank/clj-github/settings/secrets/actions
+[clojars_token]: https://github.com/clojars/clojars-web/issues/726
