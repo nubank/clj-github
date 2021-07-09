@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- Include httpkit error in exception when available
+
 ## 0.4.0
 - Add function that downloads repository content 
 
