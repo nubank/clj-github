@@ -21,14 +21,17 @@
 (defmethod spec-builder :form [request]
   request)
 
+(defn add-default-content-type [response]
+  (if (not (map? response))
+    {:body response
+     :headers {:content-type "application/json"}}
+    (update-in response [:headers :content-type] #(or % "application/json"))))
+
 (defn build-spec [spec]
   (reduce (fn [processed-fakes [request response]]
             (-> processed-fakes
                 (conj (spec-builder request))
-                (conj (if (string? response)
-                        {:body response
-                         :headers {:content-type "application/json"}}
-                        response))))
+                (conj (add-default-content-type response))))
           ["https://api.github.com/app/installations" "{}"]
           (partition 2 spec)))
 

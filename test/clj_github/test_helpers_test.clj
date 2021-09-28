@@ -35,4 +35,16 @@
                     (sut/with-fake-github ["/other" "{}"
                                            request-fn {:status 200}]
                       (httpkit-client/request client {:path "/other"})
-                      (httpkit-client/request client {:path "/api/repos"}))))))))
+                      (httpkit-client/request client {:path "/api/repos"}))))))
+
+    (testing "it adds content-type application/json by default if no content-type is provided"
+      (is (match? {:status 200 :body {:number 2}}
+                  (sut/with-fake-github ["/other" "{\"number\": 2}"]
+                                        (httpkit-client/request client {:path "/other"})))))
+
+    (testing "it maintains the content-type if one is provided"
+      (is (match? {:status 200 :body "{\"number\": 2}"}
+                  (sut/with-fake-github ["/other" {:body "{\"number\": 2}"
+                                                   :headers {:content-type "text/html"}}]
+                                        (httpkit-client/request client {:path "/other"})))))))
+
