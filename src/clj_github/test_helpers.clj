@@ -22,10 +22,10 @@
   request)
 
 (defn add-default-content-type [response]
-  (if (not (map? response))
+  (if (map? response)
+    (update-in response [:headers :content-type] #(or % "application/json"))
     {:body response
-     :headers {:content-type "application/json"}}
-    (update-in response [:headers :content-type] #(or % "application/json"))))
+     :headers {:content-type "application/json"}}))
 
 (defn build-spec [spec]
   (reduce (fn [processed-fakes [request response]]
