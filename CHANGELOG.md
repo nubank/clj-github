@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2
+
+- Add application/json content-type to mocked responses if none is provided.
+
 ## 0.4.1
 
 - Include httpkit error in exception when available
