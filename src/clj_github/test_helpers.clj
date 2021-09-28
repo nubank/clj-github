@@ -25,7 +25,10 @@
   (reduce (fn [processed-fakes [request response]]
             (-> processed-fakes
                 (conj (spec-builder request))
-                (conj response)))
+                (conj (if (string? response)
+                        {:body response
+                         :headers {:content-type "application/json"}}
+                        response))))
           ["https://api.github.com/app/installations" "{}"]
           (partition 2 spec)))
 
