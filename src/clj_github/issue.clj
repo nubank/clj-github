@@ -21,3 +21,12 @@
   [client org repo issue-number label]
   (fetch-body! client {:path (str (issue-url org repo issue-number) "/labels/" label)
                        :method :delete}))
+
+(defn comment!
+  "Create an issue comment.
+
+  For details about the response format, look at https://docs.github.com/en/rest/reference/issues#create-an-issue-comment."
+  [client org repo issue-number message]
+  (fetch-body! client {:path (str (issue-url org repo issue-number) "/comments")
+                       :method :post
+                       :body {:body message}}))
