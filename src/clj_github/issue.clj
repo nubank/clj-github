@@ -13,3 +13,11 @@
 
 (defn add-label! [client org repo issue-number label]
   (update-issue! client org repo issue-number {:labels [label]}))
+
+(defn delete-label!
+  "Delete a label from a issue.
+
+  For details about the response format, look at https://docs.github.com/en/rest/reference/issues#remove-a-label-from-an-issue."
+  [client org repo issue-number label]
+  (fetch-body! client {:path (str (issue-url org repo issue-number) "/labels/" label)
+                       :method :delete}))
