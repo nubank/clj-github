@@ -30,12 +30,8 @@
   "Updates a check run using its id.
 
   For details about the parameters and response format, look at https://docs.github.com/en/rest/reference/checks#update-a-check-run."
-  ([client org repo id params]
-   (fetch-body! client {:path (str (check-run-url org repo) "/" id)
-                        :headers {"Accept" "application/vnd.github.v3+json"}
-                        :method :patch
-                        :body params}))
-  ([client org repo id status]
-   (update-check-run! client org repo id {:status status}))
-  ([client org repo id conclusion]
-   (update-check-run! client org repo id {:conclusion conclusion})))
+  [client org repo id params]
+  (fetch-body! client {:path (str (check-run-url org repo) "/" id)
+                       :headers {"Accept" "application/vnd.github.v3+json"}
+                       :method :patch
+                       :body params}))
