@@ -50,3 +50,12 @@
   "get branch name associated with a pull request"
   [pull]
   (get-in pull [:head :ref]))
+
+(defn merge!
+  "Merge a pull request.
+
+  For details about the parameters and response format, look at https://docs.github.com/en/rest/reference/pulls#merge-a-pull-request"
+  [client org repo pull-number params]
+  (fetch-body! client {:path   (str (pull-url org repo pull-number) "/merge")
+                       :method :put
+                       :body   params}))
