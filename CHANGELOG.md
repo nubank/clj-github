@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1
+
+- Fix `clj-github.check/update-check-run!` overloads with same arity
+
 ## 0.5.0
 
 - Functions to create and delete a label from an issue, merge a pull request, and new namespace to work with check runs via GitHub API.
