@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0
+
+- Functions to create and delete a label from an issue, merge a pull request, and new namespace to work with check runs via GitHub API.
+
 ## 0.4.2
 
 - Add application/json content-type to mocked responses if none is provided.
