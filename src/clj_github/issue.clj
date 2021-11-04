@@ -15,7 +15,7 @@
   (update-issue! client org repo issue-number {:labels [label]}))
 
 (defn delete-label!
-  "Delete a label from a issue.
+  "Delete a label from an issue.
 
   For details about the response format, look at https://docs.github.com/en/rest/reference/issues#remove-a-label-from-an-issue."
   [client org repo issue-number label]
