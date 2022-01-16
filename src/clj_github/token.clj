@@ -12,7 +12,7 @@
 (def hub-config
   (memoize
    (fn []
-     (some-> (io/file (System/getenv "HOME") ".config/hub")
+     (some-> (io/file (System/getProperty "user.home") ".config/hub")
              file-exists-or-nil
              (slurp)
              yaml/parse-string
