@@ -1,7 +1,7 @@
 (ns clj-github.pull
   "Provides functions to work with pull requests via github api."
-  (:require [clj-github.httpkit-client :as github-client]
-            [clj-github.client-utils :refer [fetch-body!]]))
+  (:require [clj-github.client-utils :refer [fetch-body!]]
+            [clj-github.httpkit-client :as github-client]))
 
 (defn- pull-url
   ([org repo]
@@ -59,3 +59,9 @@
   (fetch-body! client {:path   (str (pull-url org repo pull-number) "/merge")
                        :method :put
                        :body   params}))
+
+(defn get-pull-files!
+  "Get files changed in a pull request."
+  [client org repo pull-number]
+  (fetch-body! client {:path   (str (pull-url org repo pull-number) "/files")
+                       :method :get}))
