@@ -14,11 +14,10 @@
             [lein-ancient "0.6.14" :exclusions [commons-logging com.fasterxml.jackson.core/jackson-databind com.fasterxml.jackson.core/jackson-core]]]
 
   :dependencies [[org.clojure/clojure "1.10.3"]
-
                  [cheshire "5.10.1"]
                  [clj-commons/clj-yaml "0.7.107"]
                  [http-kit "2.5.3"]
-                 [nubank/clj-github-app "0.1.5"]
+                 [nubank/clj-github-app "0.1.4"]
                  [nubank/state-flow "5.14.0"]
                  [clj-commons/fs "1.6.310"]]
 
