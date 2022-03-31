@@ -61,7 +61,7 @@
                        :body   params}))
 
 (defn get-pull-files!
-  "Get files changed in a pull request."
+  "Get files changed in a pull request. For more details, look at https://docs.github.com/en/rest/reference/pulls#list-pull-requests-files"
   [client org repo pull-number]
   (fetch-body! client {:path   (str (pull-url org repo pull-number) "/files")
                        :method :get}))
