@@ -4,7 +4,6 @@
             [clj-github.httpkit-client :as client]
             [clojure.java.io :as io]
             [clojure.string :as string]
-            [clojure.string :as str]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as fs-compression])
   (:import [clojure.lang ExceptionInfo]
@@ -204,7 +203,7 @@
   [clone-path]
   (->> (fs/list-dir clone-path)
        (map str)
-       (remove #(str/ends-with? % ".zip"))
+       (remove #(string/ends-with? % ".zip"))
        first))
 
 (defn clone
@@ -225,3 +224,10 @@
          (io/copy (io/file clone-path "git-response.zip")))
      (fs-compression/unzip (str clone-path "/git-response.zip") clone-path)
      (find-repo-path clone-path))))
+
+(defn create-blob!
+  [client org repo body]
+  (fetch-body! client {:path (format "/repos/%s/%s/git/blobs" org repo)
+                       :headers {"Accept" "application/vnd.github.v3+json"}
+                       :method :post
+                       :body body}))
