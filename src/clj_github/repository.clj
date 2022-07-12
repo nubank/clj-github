@@ -226,6 +226,9 @@
      (find-repo-path clone-path))))
 
 (defn create-blob!
+  "Creates a new blob object.
+
+  For details about the parameters and response format, look at https://docs.github.com/en/rest/git/blobs#create-a-blob"
   [client org repo body]
   (fetch-body! client {:path (format "/repos/%s/%s/git/blobs" org repo)
                        :headers {"Accept" "application/vnd.github.v3+json"}
