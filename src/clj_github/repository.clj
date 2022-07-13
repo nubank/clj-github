@@ -225,12 +225,21 @@
      (fs-compression/unzip (str clone-path "/git-response.zip") clone-path)
      (find-repo-path clone-path))))
 
+(defn- byte-array->base64
+  ([byte-array] (byte-array->base64 byte-array (Base64/getEncoder)))
+  ([byte-array encoder] (.encodeToString encoder byte-array)))
+
 (defn create-blob!
   "Creates a new blob object.
+  `content` the blob's content. It must be a byte-array when not using the `encoding` argument.
+  `encoding` the encoding used for content. `utf-8` and `base64` are supported.
 
   For details about the parameters and response format, look at https://docs.github.com/en/rest/git/blobs#create-a-blob"
-  [client org repo body]
-  (fetch-body! client {:path (format "/repos/%s/%s/git/blobs" org repo)
-                       :headers {"Accept" "application/vnd.github.v3+json"}
-                       :method :post
-                       :body body}))
+  ([client org repo content]
+   (create-blob! client org repo (byte-array->base64 content) "base64"))
+  ([client org repo content encoding]
+   (fetch-body! client {:path (format "/repos/%s/%s/git/blobs" org repo)
+                        :headers {"Accept" "application/vnd.github.v3+json"}
+                        :method :post
+                        :body {:content content
+                               :encoding encoding}})))

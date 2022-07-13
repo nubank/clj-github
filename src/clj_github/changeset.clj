@@ -95,20 +95,18 @@
 (defn- deleted? [content]
   (#{::deleted} content))
 
-(defn- has-sha? [content]
-  (some? (:sha content)))
-
-(defn- change->tree-object [[path content]]
+(defn- change->tree-object [{:keys [client org repo]} [path content]]
   (let [base-object {:path path
                      :mode "100644"
                      :type "blob"}]
     (condp apply [content]
       deleted? (assoc base-object :sha nil)
-      has-sha? (assoc base-object :sha (:sha content))
+      bytes? (assoc base-object :sha (-> (repository/create-blob! client org repo content)
+                                         :sha))
       (assoc base-object :content content))))
 
-(defn- changes->tree [changes]
-  (mapv change->tree-object changes))
+(defn- changes->tree [{:keys [changes] :as changeset}]
+  (mapv (partial change->tree-object changeset) changes))
 
 (defn commit!
   "Commits the changeset returning a new changeset based on the new commit revision.
@@ -118,7 +116,7 @@
   (if (empty? changes)
     changeset
     (let [{:keys [sha]} (repository/commit! client org repo base-revision {:message  message
-                                                                           :tree     (changes->tree changes)})]
+                                                                           :tree     (changes->tree changeset)})]
       (-> changeset
           (dissoc :changes)
           (assoc :base-revision sha)))))
