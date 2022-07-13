@@ -75,18 +75,6 @@
   [revision path]
   (assoc-in revision [:changes path] ::deleted))
 
-(defn put-object!
-  "Creates a blob object with the encoded content.
-  Returns a new changeset with the file under path with new encoded content and sha.
-  `content` the blob's content.
-  `encoding` the encoding used for content. `utf-8` and `base64` are supported.
-  It creates a new file if it does not exist yet."
-  [{:keys [client org repo] :as changeset} path content encoding]
-  (let [{:keys [sha]} (repository/create-blob! client org repo {:content content
-                                                                :encoding encoding})]
-    (assoc-in changeset [:changes path] {:content content
-                                         :sha sha})))
-
 (defn dirty?
   "Returns true if changes were made to the given changeset"
   [{:keys [changes]}]
