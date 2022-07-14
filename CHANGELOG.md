@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.0
+- Function to create blob objects and add in the commit other files than text files
+
 ## 0.5.1
 
 - Fix `clj-github.check/update-check-run!` overloads with same arity
@@ -17,7 +20,7 @@
 - Include httpkit error in exception when available
 
 ## 0.4.0
-- Add function that downloads repository content 
+- Add function that downloads repository content
 
 ## 0.3.0
 - Support content types other than json

@@ -18,7 +18,8 @@
 
   Note: The internal format of the changeset is considered an implementation detail and should not be relied upon.
   Always create a changeset using one of the factory functions (e.g. `from-revision`, `from-branch`)."
-  (:require [clj-github.repository :as repository]))
+  (:require [clj-github.repository :as repository])
+  (:import [java.util Base64]))
 
 (defn orphan [client org repo]
   {:client client
@@ -55,7 +56,7 @@
 
 (defn put-content
   "Returns a new changeset with the file under path with new content.
-  `content` must be a string (only text files are supported).
+  `content` can be a string or a byte-array.
   It creates a new file if it does not exist yet."
   [changeset path content]
   (assoc-in changeset [:changes path] content))
@@ -80,16 +81,29 @@
   [{:keys [changes]}]
   (not (empty? changes)))
 
-(defn- change->tree-object [[path content]]
+(defn- deleted? [content]
+  (#{::deleted} content))
+
+(defn- byte-array->base64
+  ([byte-array] (byte-array->base64 byte-array (Base64/getEncoder)))
+  ([byte-array encoder] (.encodeToString encoder byte-array)))
+
+(defn- content->sha-blob! [{:keys [client org repo]} content]
+  (-> (repository/create-blob! client org repo {:content (byte-array->base64 content)
+                                                :encoding "base64"})
+      :sha))
+
+(defn- change->tree-object [changeset [path content]]
   (let [base-object {:path path
                      :mode "100644"
                      :type "blob"}]
-    (case content
-      ::deleted (assoc base-object :sha nil)
+    (condp apply [content]
+      deleted? (assoc base-object :sha nil)
+      bytes? (assoc base-object :sha (content->sha-blob! changeset content))
       (assoc base-object :content content))))
 
-(defn- changes->tree [changes]
-  (mapv change->tree-object changes))
+(defn- changes->tree [{:keys [changes] :as changeset}]
+  (mapv (partial change->tree-object changeset) changes))
 
 (defn commit!
   "Commits the changeset returning a new changeset based on the new commit revision.
@@ -99,7 +113,7 @@
   (if (empty? changes)
     changeset
     (let [{:keys [sha]} (repository/commit! client org repo base-revision {:message  message
-                                                                           :tree     (changes->tree changes)})]
+                                                                           :tree     (changes->tree changeset)})]
       (-> changeset
           (dissoc :changes)
           (assoc :base-revision sha)))))
