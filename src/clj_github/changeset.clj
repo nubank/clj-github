@@ -18,7 +18,8 @@
 
   Note: The internal format of the changeset is considered an implementation detail and should not be relied upon.
   Always create a changeset using one of the factory functions (e.g. `from-revision`, `from-branch`)."
-  (:require [clj-github.repository :as repository])
+  (:require [clj-github.repository :as repository]
+            [clojure.java.io :as io])
   (:import [java.util Base64]))
 
 (defn orphan [client org repo]
@@ -45,13 +46,18 @@
                       :commit
                       :sha)})
 
+(defn clone [{:keys [client org repo revision] :as changeset}]
+  (assoc changeset :temp-dir (repository/clone client org repo revision)))
+
 (defn get-content
   "Returns the content of a file (as a string) for a given changeset."
-  [{:keys [client org repo base-revision changes]} path]
+  [{:keys [client org repo base-revision changes temp-dir]} path]
   (let [content (get changes path)]
     (case content
       ::deleted nil
       (or content
+          (when temp-dir
+            (slurp (io/file temp-dir path))) ; TODO deal with binary file
           (repository/get-content! client org repo path {:ref base-revision})))))
 
 (defn put-content
