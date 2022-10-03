@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.1
+- Bump `clj-github-app` version
+
 ## 0.6.0
 - Function to create blob objects and add in the commit other files than text files
 
