@@ -17,7 +17,7 @@
                  [cheshire "5.10.1"]
                  [clj-commons/clj-yaml "0.7.107"]
                  [http-kit "2.5.3"]
-                 [nubank/clj-github-app "0.2.0"]
+                 [nubank/clj-github-app "0.2.1"]
                  [nubank/state-flow "5.14.0"]
                  [clj-commons/fs "1.6.310"]]
 
