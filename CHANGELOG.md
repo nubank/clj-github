@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.2
+- Bump `clj-github-app` version
+
 ## 0.6.1
 - Bump `clj-github-app` version
 
