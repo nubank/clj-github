@@ -4,7 +4,8 @@
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
 
-  :repositories [["publish" {:url "https://clojars.org/repo"
+  :repositories ^:replace [["nu-codeartifact" {:url "https://maven.cicd.nubank.world"}]
+                           ["publish" {:url "https://clojars.org/repo"
                              :username :env/clojars_username
                              :password :env/clojars_passwd
                              :sign-releases false}]]
