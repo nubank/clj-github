@@ -19,7 +19,8 @@
   Note: The internal format of the changeset is considered an implementation detail and should not be relied upon.
   Always create a changeset using one of the factory functions (e.g. `from-revision`, `from-branch`)."
   (:require [clj-github.repository :as repository]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [clojure.string :as str])
   (:import [java.util Base64]))
 
 (defn orphan [client org repo]
@@ -46,18 +47,36 @@
                       :commit
                       :sha)})
 
-(defn clone [{:keys [client org repo revision] :as changeset}]
-  (assoc changeset :temp-dir (repository/clone client org repo revision)))
+(defn clone [{:keys [client org repo base-revision] :as changeset}]
+  (assoc changeset :repo-dir (repository/clone client org repo base-revision)))
+
+(defn paths [{:keys [repo-dir changes] :as changeset}]
+  (if repo-dir
+    (let [dir-paths (->> (io/file repo-dir)
+                         file-seq
+                         (remove #(.isDirectory %))
+                         (map #(str/replace (.getPath %) (str repo-dir "/") ""))
+                         set)]
+      (reduce
+       (fn [acc [path content]]
+         (case content
+           ::deleted (remove #{path} acc)
+           (conj acc path)))
+       dir-paths
+       changes))
+    (-> changeset
+        clone
+        paths)))
 
 (defn get-content
   "Returns the content of a file (as a string) for a given changeset."
-  [{:keys [client org repo base-revision changes temp-dir]} path]
+  [{:keys [client org repo base-revision changes repo-dir]} path]
   (let [content (get changes path)]
     (case content
       ::deleted nil
       (or content
-          (when temp-dir
-            (slurp (io/file temp-dir path))) ; TODO deal with binary file
+          (when repo-dir
+            (slurp (io/file repo-dir path))) ; TODO deal with binary file
           (repository/get-content! client org repo path {:ref base-revision})))))
 
 (defn put-content
@@ -85,7 +104,7 @@
 (defn dirty?
   "Returns true if changes were made to the given changeset"
   [{:keys [changes]}]
-  (not (empty? changes)))
+  (seq changes))
 
 (defn- deleted? [content]
   (#{::deleted} content))
@@ -122,6 +141,7 @@
                                                                            :tree     (changes->tree changeset)})]
       (-> changeset
           (dissoc :changes)
+          (dissoc :repo-dir)
           (assoc :base-revision sha)))))
 
 (defn- branch-ref [branch]
