@@ -9,17 +9,17 @@
   (:import [clojure.lang ExceptionInfo]
            [java.util Base64]))
 
-(defn- base64->string
-  ([base64] (base64->string base64 (Base64/getDecoder)))
-  ([base64 decoder] (String. (.decode decoder ^String base64) "UTF-8")))
+(defn- base64->byte-array [^String base64]
+  (.decode (Base64/getDecoder) base64))
 
 (defn- split-lines [content]
   (string/split content #"\r?\n" -1)) ; make sure we don't lose \n at the end of the string
 
-(defn- base64-lines->string [content]
-  (->> (split-lines content)
-       (map base64->string)
-       (string/join)))
+(defn- base64-lines->byte-array [content]
+  (byte-array
+   (->> (split-lines content)
+        (map base64->byte-array)
+        (mapcat seq))))
 
 (defn get-contents!
   "Returns the list of contents of a repository default branch (usually `master`).
@@ -44,20 +44,20 @@
   An optional `:ref` parameter can be used to fetch content from a different commit/branch/tag.
   If the file does not exist, nil is returned.
 
-  Note 1: it currently does not work for directories, symlinks and submodules.
-  Note 2: it only works for text files"
+  Note: it currently does not work for directories, symlinks and submodules."
   ([client org repo path]
    (get-content! client org repo path {}))
-  ([client org repo path {:keys [ref branch]}]
+  ([client org repo path {:keys [ref branch binary? encoding] :or {binary? false encoding "UTF-8"}}]
    (try
-     (-> (fetch-body! client (merge {:method :get
-                                     :path (format "/repos/%s/%s/contents/%s" org repo path)}
-                                    (cond
-                                      ref    {:query-params {"ref" ref}}
-                                      branch {:query-params {"branch" branch}}
-                                      :else  {})))
-         :content
-         base64-lines->string)
+     (let [bytes (-> (fetch-body! client (merge {:method :get
+                                                 :path (format "/repos/%s/%s/contents/%s" org repo path)}
+                                                (cond
+                                                  ref    {:query-params {"ref" ref}}
+                                                  branch {:query-params {"branch" branch}}
+                                                  :else  {})))
+                     :content
+                     base64-lines->byte-array)]
+       (if binary? bytes (String. bytes encoding)))
      (catch ExceptionInfo e
        (if (= 404 (-> (ex-data e) :response :status))
          nil

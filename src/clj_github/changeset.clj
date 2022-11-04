@@ -68,16 +68,33 @@
         clone
         paths)))
 
+(defn- read-file [file binary?]
+  (with-open [in (java.io.FileInputStream. file)
+              out (java.io.ByteArrayOutputStream.)]
+    (io/copy in out)
+    (let [bytes (.toByteArray out)]
+      (if binary?
+        bytes
+        (String. bytes "UTF-8")))))
+
 (defn get-content
-  "Returns the content of a file (as a string) for a given changeset."
-  [{:keys [client org repo base-revision changes repo-dir]} path]
-  (let [content (get changes path)]
-    (case content
-      ::deleted nil
-      (or content
-          (when repo-dir
-            (slurp (io/file repo-dir path))) ; TODO deal with binary file
-          (repository/get-content! client org repo path {:ref base-revision})))))
+  "Returns the content of a file for a given changeset.
+   By default file content is returned as a string.
+   Use `binary? true` to return file content as byte array."
+  ([revision path]
+   (get-content revision path {}))
+  ([{:keys [client org repo base-revision changes repo-dir]} path {:keys [binary? encoding]
+                                                                   :or {binary? false
+                                                                        encoding "UTF-8"}}]
+   (let [content (get changes path)]
+     (case content
+       ::deleted nil
+       (or content
+           (when repo-dir
+             (read-file (io/file repo-dir path) binary?))
+           (repository/get-content! client org repo path {:ref base-revision
+                                                          :binary? binary?
+                                                          :encoding encoding}))))))
 
 (defn put-content
   "Returns a new changeset with the file under path with new content.
@@ -86,15 +103,23 @@
   [changeset path content]
   (assoc-in changeset [:changes path] content))
 
+(defn- same-content? [old-content new-content]
+  (cond
+    (string? old-content) (= old-content new-content)
+    (and (bytes? old-content) (bytes? new-content)) (java.util.Arrays/equals old-content new-content) 
+    :else false))
+
 (defn update-content
   "Returns a new changeset with the file under path with new content return by `update-fn`.
   `update-fn` should be an 1-arg function that receives the current content of the file."
-  [revision path update-fn]
-  (let [old-content (get-content revision path)
-        new-content (update-fn old-content)]
-    (if (= old-content new-content)
-      revision
-      (put-content revision path new-content))))
+  ([revision path update-fn]
+   (update-content revision path update-fn {}))
+  ([revision path update-fn opts]
+   (let [old-content (get-content revision path opts)
+         new-content (update-fn old-content)]
+     (if (same-content? old-content new-content)
+       revision
+       (put-content revision path new-content)))))
 
 (defn delete
   "Returns a new changeset with the file under path deleted."
