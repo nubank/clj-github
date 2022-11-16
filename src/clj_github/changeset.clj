@@ -47,10 +47,17 @@
                       :commit
                       :sha)})
 
-(defn clone [{:keys [client org repo base-revision] :as changeset}]
+(defn clone
+  "Clones the repository into local file system.
+   Consider using `clone` if you need to change several files,
+   since it will reduce the number of calls to the github api.
+   Returns a new changeset with the repository cloned."
+  [{:keys [client org repo base-revision] :as changeset}]
   (assoc changeset :repo-dir (repository/clone client org repo base-revision)))
 
-(defn paths [{:keys [repo-dir changes] :as changeset}]
+(defn paths
+  "Returns the paths for all files in the repository."
+  [{:keys [repo-dir changes] :as changeset}]
   (if repo-dir
     (let [dir-paths (->> (io/file repo-dir)
                          file-seq
@@ -80,7 +87,9 @@
 (defn get-content
   "Returns the content of a file for a given changeset.
    By default file content is returned as a string.
-   Use `binary? true` to return file content as byte array."
+   Available opts:
+   `binary?`: if true the content is returned as a byte array (defaults to false)
+   `encoding`: encoding used to read the file content (defaults to `\"UTF-8\"`)"
   ([revision path]
    (get-content revision path {}))
   ([{:keys [client org repo base-revision changes repo-dir]} path {:keys [binary? encoding]
@@ -111,7 +120,8 @@
 
 (defn update-content
   "Returns a new changeset with the file under path with new content return by `update-fn`.
-  `update-fn` should be an 1-arg function that receives the current content of the file."
+  `update-fn` should be an 1-arg function that receives the current content of the file.
+   Receives same `opts` as `get-content`."
   ([revision path update-fn]
    (update-content revision path update-fn {}))
   ([revision path update-fn opts]
