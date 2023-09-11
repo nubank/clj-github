@@ -5,7 +5,8 @@
             [clojure.java.io :as io]
             [clojure.string :as string]
             [me.raynes.fs :as fs]
-            [me.raynes.fs.compression :as fs-compression])
+            [me.raynes.fs.compression :as fs-compression]
+            [ring.util.codec :as encode])
   (:import [clojure.lang ExceptionInfo]
            [java.util Base64]))
 
@@ -74,7 +75,7 @@
   Look at https://developer.github.com/v3/repos/branches/#get-a-branch for details about the response format."
   [client org repo branch]
   (fetch-body! client {:method :get
-                       :path (format "/repos/%s/%s/branches/%s" org repo branch)}))
+                       :path (format "/repos/%s/%s/branches/%s" org repo (encode/form-encode branch))}))
 
 (defn get-tree!
   "Returns information about a tree.
