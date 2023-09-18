@@ -19,7 +19,8 @@
                  [http-kit "2.5.3"]
                  [nubank/clj-github-app "0.2.1"]
                  [nubank/state-flow "5.14.0"]
-                 [clj-commons/fs "1.6.310"]]
+                 [clj-commons/fs "1.6.310"]
+                 [ring.util.codec "1.1.3"]]
 
   :cljfmt {:indents {flow       [[:block 1]]
                      assoc-some [[:block 0]]}}
