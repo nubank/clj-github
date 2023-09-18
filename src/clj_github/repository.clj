@@ -75,7 +75,7 @@
   Look at https://developer.github.com/v3/repos/branches/#get-a-branch for details about the response format."
   [client org repo branch]
   (fetch-body! client {:method :get
-                       :path (format "/repos/%s/%s/branches/%s" org repo (encode/form-encode branch))}))
+                       :path (format "/repos/%s/%s/branches/%s" org repo (codec/url-encode branch))}))
 
 (defn get-tree!
   "Returns information about a tree.
