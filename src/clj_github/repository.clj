@@ -6,7 +6,7 @@
             [clojure.string :as string]
             [me.raynes.fs :as fs]
             [me.raynes.fs.compression :as fs-compression]
-            [ring.util.codec :as encode])
+            [ring.util.codec :as codec])
   (:import [clojure.lang ExceptionInfo]
            [java.util Base64]))
 
