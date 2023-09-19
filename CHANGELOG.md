@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.3
+- Fix special characters on branch name
+
 ## 0.6.2
 - Bump `clj-github-app` version
 
