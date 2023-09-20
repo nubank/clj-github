@@ -1,4 +1,4 @@
-(defproject dev.nubank/clj-github "0.6.2"
+(defproject dev.nubank/clj-github "0.6.3"
   :description "A Clojure library for interacting with the github developer API"
   :url "https://github.com/nubank/clj-github"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -19,7 +19,8 @@
                  [http-kit "2.5.3"]
                  [nubank/clj-github-app "0.2.1"]
                  [nubank/state-flow "5.14.0"]
-                 [clj-commons/fs "1.6.310"]]
+                 [clj-commons/fs "1.6.310"]
+                 [ring/ring-codec "1.2.0"]]
 
   :cljfmt {:indents {flow       [[:block 1]]
                      assoc-some [[:block 0]]}}
