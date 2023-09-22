@@ -148,7 +148,7 @@
 
   Look at https://developer.github.com/v3/git/refs/#update-a-reference for details about the parameters and response format."
   [client org repo ref params]
-  (fetch-body! client {:path (format "/repos/%s/%s/git/refs/%s" org repo ref)
+  (fetch-body! client {:path (format "/repos/%s/%s/git/refs/%s" org repo (codec/url-encode ref))
                        :headers {"Accept" "application/vnd.github.v3+json"}
                        :method :patch
                        :body params}))

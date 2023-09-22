@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.4
+- Encode ref parameter in update-reference! from repository.clj namespace
+
 ## 0.6.3
 - Fix special characters on branch name
 
