@@ -29,13 +29,20 @@
   (or (get-in response [:headers :content-type])
       (get-in response [:headers "Content-Type"])))
 
+(defn async-request
+  ([client req-map]
+   (async-request client req-map identity))
+  ([client req-map handler]
+   (let [unmarshaller (fn [response]
+                        (if (success-codes (:status response))
+                          (update response :body (partial parse-body (content-type response)))
+                          (throw (ex-info "Request to Github failed"
+                                          {:response (select-keys response [:status :body])}
+                                          (:error response)))))]
+     (httpkit/request (prepare client req-map) (comp handler unmarshaller)))))
+
 (defn request [client req-map]
-  (let [response @(httpkit/request (prepare client req-map))]
-    (if (success-codes (:status response))
-      (update response :body (partial parse-body (content-type response)))
-      (throw (ex-info "Request to GitHub failed"
-                      {:response (select-keys response [:status :body])}
-                      (:error response))))))
+  @(async-request client req-map))
 
 (defn new-client [{:keys [app-id private-key token org] :as opts}]
   (cond
@@ -44,9 +51,9 @@
 
     app-id
     {:token-fn (token/github-app-token-manager
-                 (assoc-some {:github-app-id      app-id
-                              :github-private-key private-key}
-                             :github-org org))}
+                (assoc-some {:github-app-id      app-id
+                             :github-private-key private-key}
+                            :github-org org))}
 
     :else
     opts))
