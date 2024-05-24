@@ -54,7 +54,7 @@
       (throw (ex-info "Request to GitHub failed"
                       {:response (select-keys response [:status :body])
                        :opts     opts}
-                      (:error response)))
+                      error))
 
       :else
       (assoc response :body (parse-body (content-type response) body)))))
