@@ -26,7 +26,7 @@
                      assoc-some [[:block 0]]}}
 
   :profiles {:dev {:plugins [[lein-project-version "0.1.0"]]
-                   :dependencies [[ch.qos.logback/logback-classic "1.5.6" :exclusions [com.sun.mail/javax.mail]]
+                   :dependencies [[ch.qos.logback/logback-classic "1.3.0" :exclusions [com.sun.mail/javax.mail]]
                                   [org.clojure/test.check "1.1.1"]
                                   [nubank/matcher-combinators "3.9.1" :exclusions [mvxcvi/puget commons-codec]]
                                   [tortue/spy "2.14.0"]
