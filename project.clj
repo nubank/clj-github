@@ -9,29 +9,29 @@
                              :password :env/clojars_passwd
                              :sign-releases false}]]
 
-  :plugins [[lein-cljfmt "0.6.4" :exclusions [org.clojure/clojure]]
+  :plugins [[lein-cljfmt "0.9.2" :exclusions [org.clojure/clojure]]
             [lein-nsorg "0.3.0" :exclusions [org.clojure/clojure]]
-            [lein-ancient "0.6.14" :exclusions [commons-logging com.fasterxml.jackson.core/jackson-databind com.fasterxml.jackson.core/jackson-core]]]
+            [lein-ancient "0.7.0" :exclusions [commons-logging com.fasterxml.jackson.core/jackson-databind com.fasterxml.jackson.core/jackson-core]]]
 
-  :dependencies [[org.clojure/clojure "1.10.3"]
-                 [cheshire "5.10.1"]
-                 [clj-commons/clj-yaml "0.7.107"]
-                 [http-kit "2.5.3"]
+  :dependencies [[org.clojure/clojure "1.11.3"]
+                 [cheshire "5.13.0"]
+                 [clj-commons/clj-yaml "1.0.27"]
+                 [http-kit "2.8.0"]
                  [nubank/clj-github-app "0.2.1"]
-                 [nubank/state-flow "5.14.0"]
-                 [clj-commons/fs "1.6.310"]
+                 [nubank/state-flow "5.17.0"]
+                 [clj-commons/fs "1.6.311"]
                  [ring/ring-codec "1.2.0"]]
 
   :cljfmt {:indents {flow       [[:block 1]]
                      assoc-some [[:block 0]]}}
 
   :profiles {:dev {:plugins [[lein-project-version "0.1.0"]]
-                   :dependencies [[ch.qos.logback/logback-classic "1.3.0-alpha4" :exclusions [com.sun.mail/javax.mail]]
+                   :dependencies [[ch.qos.logback/logback-classic "1.5.6" :exclusions [com.sun.mail/javax.mail]]
                                   [org.clojure/test.check "1.1.1"]
-                                  [nubank/matcher-combinators "3.3.1" :exclusions [mvxcvi/puget commons-codec]]
-                                  [tortue/spy "2.9.0"]
+                                  [nubank/matcher-combinators "3.9.1" :exclusions [mvxcvi/puget commons-codec]]
+                                  [tortue/spy "2.14.0"]
                                   [http-kit.fake "0.2.2"]
-                                  [metosin/reitit-core "0.5.15"]
+                                  [metosin/reitit-core "0.7.0"]
                                   [dev.nubank/clj-github-mock "0.2.0"]]}}
 
   :aliases {"coverage" ["cloverage" "-s" "coverage"]

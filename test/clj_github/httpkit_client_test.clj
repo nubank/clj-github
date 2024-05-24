@@ -31,11 +31,18 @@
                                   "Content-Type" "application/json"}}
                        {:status 200}]
         (is (match? {:status 200} (sut/request client {})))))
-    (testing "it throws an exception when status code is not succesful"
+    (testing "it throws an exception when status code is not successful"
       (with-fake-http [{} {:status 400}]
         (is (thrown-with-msg? clojure.lang.ExceptionInfo #"(?i)Request to GitHub failed"
                               (sut/request client {})))))
-    ;; in case of lower level errors, e.g. DNS lookup failue there will not be a status code
+    (testing "it does not throw with a failure status if so enabled"
+      (with-fake-http [{:headers {"Authorization" "Bearer token"
+                                  "Content-Type"  "application/json"}}
+                       {:status 404}]
+                      (is (match?
+                            {:status 404}
+                            (sut/request client {:throw? false})))))
+    ;; in case of lower level errors, e.g. DNS lookup failure there will not be a status code
     (testing "it throws an exception when there is no status code"
       (with-fake-http [{} {:status nil}]
         (is (thrown-with-msg? clojure.lang.ExceptionInfo #"(?i)Request to GitHub failed"
@@ -44,7 +51,7 @@
       (let [cause (Exception. "Exception for testing purpose")]
         (with-fake-http [{} {:error cause :status nil}]
           (let [e (try (sut/request client {}) (catch Exception e e))]
-            (is (re-matches #"(?i)Request to GitHub failed" (.getMessage e)))
+            (is (re-matches #"(?i)Failure sending request to GitHub" (.getMessage e)))
             (is (= cause (.getCause e)))))))
     (testing "url path contains special character `|`"
       (with-fake-http [{:url "https://api.github.com/test%7Ctest"}
