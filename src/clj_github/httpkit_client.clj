@@ -29,13 +29,35 @@
   (or (get-in response [:headers :content-type])
       (get-in response [:headers "Content-Type"])))
 
-(defn request [client req-map]
-  (let [response @(httpkit/request (prepare client req-map))]
-    (if (success-codes (:status response))
-      (update response :body (partial parse-body (content-type response)))
+(defn request
+  "Sends a synchronous request to GitHub, largely as a wrapper around HTTP Kit.
+
+  In addition to normal HTTP Kit keys in the request map, two additional keys are added.
+
+  :path - used to create the :url key for HTTP kit; this is the path relative to https://api.github.com.
+
+  :throw? - if true (the default), then non-success status codes (codes outside the range of 200 to 204)
+    result in a thrown exception. If set to false, then the response is returned, regardless and the
+    caller can decide what to do with failure statuses."
+  [client req-map]
+  (let [{:keys [throw?]
+         :or   {throw? true}} req-map
+        {:keys [error status body opts] :as response} @(httpkit/request (prepare client req-map))]
+    (cond
+      error
+      (throw (ex-info "Failure sending request to GitHub"
+                      {:opts opts}
+                      error))
+
+      (and throw?
+           (not (success-codes status)))
       (throw (ex-info "Request to GitHub failed"
-                      {:response (select-keys response [:status :body])}
-                      (:error response))))))
+                      {:response (select-keys response [:status :body])
+                       :opts     opts}
+                      error))
+
+      :else
+      (assoc response :body (parse-body (content-type response) body)))))
 
 (defn new-client [{:keys [app-id private-key token org] :as opts}]
   (cond
