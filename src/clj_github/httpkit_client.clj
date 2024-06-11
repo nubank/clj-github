@@ -36,9 +36,9 @@
 
   :path - used to create the :url key for HTTP kit; this is the path relative to https://api.github.com.
 
-  :throw? - if true (the default), then non-success status codes result in a thrown exception.
-    If set to false, then the response is returned, regardless and the caller can decide what to do
-    with failure statuses."
+  :throw? - if true (the default), then non-success status codes (codes outside the range of 200 to 204)
+    result in a thrown exception. If set to false, then the response is returned, regardless and the
+    caller can decide what to do with failure statuses."
   [client req-map]
   (let [{:keys [throw?]
          :or   {throw? true}} req-map
