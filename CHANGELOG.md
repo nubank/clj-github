@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.5
+
+- Non-success status codes should not always result in a thrown exception
+
 ## 0.6.4
 - Encode ref parameter in update-reference! from repository.clj namespace
 
