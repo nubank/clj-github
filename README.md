@@ -23,28 +23,42 @@ that the client will automatically convert to a url with the github address.
 
 ### Credentials options
 
-When create a client you can use a number options to determine how it will obtain the app
+When creating a client you can use a number of options to determine how it will obtain the app
 credentials.
-
-When looking for credentials the client will by default first:
-
- 1. Look for your personal token at `~/.config/hub` (this is the configuration file of `hub` tool).
- 2. Look for an environment variable named `GITHUB_TOKEN`.
 
 #### `:app-id` + `:private-key`
 
-If you have the credentials stored in a different place, you can pass them directly to the client.
-The client will always use them and will not fallback to local configurations.
+The client uses the provided app ID and private key to generate an [installation access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)
+for a GitHub App.
+
+The generated token is cached and will be automatically refreshed when needed.
+
+`:private-key` must be a PEM encoded string.
 
 #### `:token`
 
-For quick test you can also pass a token directly to the client. The client will use it and not
-try to fetch one from the app.
+The client uses the provided hardcoded token string. Useful for experimentation, but not recommended for production 
+workloads.
 
 #### `:token-fn`
 
-If you have special needs, you can pass a function without parameters, the client will always
-call that function when it makes a request.
+You can provide an arbitrary zero-argument function that when invoked returns a valid token string.
+
+Some common token functions are available in `clj-github.token`, and `clj-github.token/chain` can
+be used to try multiple token functions in order.
+
+In the example below, the chain will look for:
+1. an environment variable named `GITHUB_TOKEN`.
+2. a token managed by `gh` CLI (by running `gh auth token`)
+3. a personal token at `~/.config/hub` (this is the configuration file of `hub` tool)
+
+```clojure
+(require '[clj-github.token :as token])
+
+(github-client/new-client {:token-fn (token/chain [token/env-var
+                                                   token/gh-cli
+                                                   token/hub-config])})
+```
 
 ### Managing repositories
 
