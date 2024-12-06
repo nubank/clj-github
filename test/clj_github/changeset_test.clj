@@ -1,8 +1,8 @@
 (ns clj-github.changeset-test
-  (:require [clojure.test :refer :all]
-            [clj-github-mock.core :as mock.core]
+  (:require [clj-github-mock.core :as mock.core]
             [clj-github.changeset :as sut]
             [clj-github.httpkit-client :as client]
+            [clojure.test :refer :all]
             [org.httpkit.fake :as fake]))
 
 (defmacro with-client [[client initial-state] & body]
@@ -14,6 +14,9 @@
 (def initial-state {:orgs [{:name "nubank" :repos [{:name           "repo"
                                                     :default_branch "master"}]}]})
 
+(def string-content-with-special-chars
+  "This is a string with special characters: \uD83C\uDF89\uD83C\uDF89\uD83C\uDF89\uD83D\uDD25\uD83D\uDD25\uD83D\uDD25")
+
 (deftest get-content-test
   (testing "get content from client if there is no change"
     (with-client [client initial-state]
@@ -23,6 +26,15 @@
           (sut/create-branch! "master"))
       (let [revision (sut/from-branch! client "nubank" "repo" "master")]
         (is (= "content"
+               (sut/get-content revision "file"))))))
+  (testing "get string content with special characters"
+    (with-client [client initial-state]
+      (-> (sut/orphan client "nubank" "repo")
+          (sut/put-content "file" string-content-with-special-chars)
+          (sut/commit! "initial commit")
+          (sut/create-branch! "master"))
+      (let [revision (sut/from-branch! client "nubank" "repo" "master")]
+        (is (= string-content-with-special-chars
                (sut/get-content revision "file"))))))
   (testing "get changed content"
     (with-client [client initial-state]

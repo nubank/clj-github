@@ -25,7 +25,7 @@
                  ; Must be provided by the user (typically only used in tests)
                  [http-kit.fake "0.2.2" :scope "provided"]
                  [nubank/state-flow "5.18.0" :scope "provided"]
-                 [dev.nubank/clj-github-mock "0.3.0" :scope "provided"]]
+                 [dev.nubank/clj-github-mock "0.4.0" :scope "provided"]]
 
   :cljfmt {:indents {flow       [[:block 1]]
                      assoc-some [[:block 0]]}}
