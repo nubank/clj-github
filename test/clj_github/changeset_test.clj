@@ -75,4 +75,13 @@
           (sut/create-branch! "master"))
       (is (nil? (-> (sut/from-branch! client "nubank" "repo" "master")
                     (sut/delete "file")
-                    (sut/get-content "file")))))))
+                    (sut/get-content "file"))))))
+  (testing "get missing file"
+    (with-client [client initial-state]
+      (-> (sut/orphan client "nubank" "repo")
+          (sut/put-content "file" "content")
+          (sut/commit! "initial commit")
+          (sut/create-branch! "master"))
+      (let [revision (sut/from-branch! client "nubank" "repo" "master")]
+        (is (nil? (sut/get-content revision "different_file")))
+        (is (nil? (sut/get-content-raw revision "different_file")))))))
