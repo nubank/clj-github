@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.1
+
+- Fix decoding bug introduced in 0.7.0
+  - Don't try to base64 decode content if nil
+
 ## 0.7.0
 
 - Fix decoding bug in `get-content!`

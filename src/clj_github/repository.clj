@@ -60,7 +60,8 @@
   ([client org repo path]
    (get-content! client org repo path {}))
   ([client org repo path {:keys [ref branch]}]
-   (base64-lines->string (get-content* client org repo path ref branch))))
+   (some-> (get-content* client org repo path ref branch)
+           base64-lines->string)))
 
 (defn get-content-raw!
   "Returns the bytes contents of a file from the repository default branch (usually `master`).
@@ -71,7 +72,8 @@
   (^bytes [client org repo path]
    (get-content-raw! client org repo path {}))
   (^bytes [client org repo path {:keys [ref branch]}]
-   (base64-lines->bytes (get-content* client org repo path ref branch))))
+   (some-> (get-content* client org repo path ref branch)
+           base64-lines->bytes)))
 
 (defn get-repo!
   [client org repo]
