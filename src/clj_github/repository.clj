@@ -10,17 +10,11 @@
   (:import [clojure.lang ExceptionInfo]
            [java.util Base64]))
 
-(defn- base64->string
-  ([base64] (base64->string base64 (Base64/getDecoder)))
-  ([base64 decoder] (String. (.decode decoder ^String base64) "UTF-8")))
-
-(defn- split-lines [content]
-  (string/split content #"\r?\n" -1)) ; make sure we don't lose \n at the end of the string
+(defn- base64-lines->bytes ^bytes [^String content]
+  (.decode (Base64/getDecoder) (.replace content "\n" "")))
 
 (defn- base64-lines->string [content]
-  (->> (split-lines content)
-       (map base64->string)
-       (string/join)))
+  (String. (base64-lines->bytes content) "UTF-8"))
 
 (defn get-contents!
   "Returns the list of contents of a repository default branch (usually `master`).
@@ -40,6 +34,22 @@
          nil
          (throw e))))))
 
+(defn- get-content*
+  "Returns the base64 encoded contents of a file"
+  [client org repo path ref branch]
+  (try
+    (-> (fetch-body! client (merge {:method :get
+                                    :path (format "/repos/%s/%s/contents/%s" org repo path)}
+                                   (cond
+                                     ref    {:query-params {"ref" ref}}
+                                     branch {:query-params {"branch" branch}}
+                                     :else  {})))
+        :content)
+    (catch ExceptionInfo e
+      (if (= 404 (-> (ex-data e) :response :status))
+        nil
+        (throw e)))))
+
 (defn get-content!
   "Returns the content of a text file from the repository default branch (usually `master`).
   An optional `:ref` parameter can be used to fetch content from a different commit/branch/tag.
@@ -50,19 +60,18 @@
   ([client org repo path]
    (get-content! client org repo path {}))
   ([client org repo path {:keys [ref branch]}]
-   (try
-     (-> (fetch-body! client (merge {:method :get
-                                     :path (format "/repos/%s/%s/contents/%s" org repo path)}
-                                    (cond
-                                      ref    {:query-params {"ref" ref}}
-                                      branch {:query-params {"branch" branch}}
-                                      :else  {})))
-         :content
-         base64-lines->string)
-     (catch ExceptionInfo e
-       (if (= 404 (-> (ex-data e) :response :status))
-         nil
-         (throw e))))))
+   (base64-lines->string (get-content* client org repo path ref branch))))
+
+(defn get-content-raw!
+  "Returns the bytes contents of a file from the repository default branch (usually `master`).
+  An optional `:ref` parameter can be used to fetch content from a different commit/branch/tag.
+  If the file does not exist, nil is returned.
+
+  Note: only works for blobs."
+  (^bytes [client org repo path]
+   (get-content-raw! client org repo path {}))
+  (^bytes [client org repo path {:keys [ref branch]}]
+   (base64-lines->bytes (get-content* client org repo path ref branch))))
 
 (defn get-repo!
   [client org repo]

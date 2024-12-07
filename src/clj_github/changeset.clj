@@ -54,6 +54,15 @@
       (or content
           (repository/get-content! client org repo path {:ref base-revision})))))
 
+(defn get-content-raw
+  "Returns the content of a file (as a byte array) for a given changeset."
+  ^bytes [{:keys [client org repo base-revision changes]} path]
+  (let [content (get changes path)]
+    (case content
+      ::deleted nil
+      (or content
+          (repository/get-content-raw! client org repo path {:ref base-revision})))))
+
 (defn put-content
   "Returns a new changeset with the file under path with new content.
   `content` can be a string or a byte-array.
@@ -85,8 +94,7 @@
   (#{::deleted} content))
 
 (defn- byte-array->base64
-  ([byte-array] (byte-array->base64 byte-array (Base64/getEncoder)))
-  ([byte-array encoder] (.encodeToString encoder byte-array)))
+  [byte-array] (.encodeToString (Base64/getEncoder) byte-array))
 
 (defn- content->sha-blob! [{:keys [client org repo]} content]
   (-> (repository/create-blob! client org repo {:content (byte-array->base64 content)

@@ -1,4 +1,4 @@
-(defproject dev.nubank/clj-github "0.6.5"
+(defproject dev.nubank/clj-github "0.7.0"
   :description "A Clojure library for interacting with the github developer API"
   :url "https://github.com/nubank/clj-github"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -9,30 +9,30 @@
                              :password :env/clojars_passwd
                              :sign-releases false}]]
 
-  :plugins [[lein-cljfmt "0.9.2" :exclusions [org.clojure/clojure]]
-            [lein-nsorg "0.3.0" :exclusions [org.clojure/clojure]]
-            [lein-ancient "0.7.0" :exclusions [commons-logging com.fasterxml.jackson.core/jackson-databind com.fasterxml.jackson.core/jackson-core]]]
+  :plugins [[lein-cljfmt "0.9.2"]
+            [lein-nsorg "0.3.0"]
+            [lein-ancient "0.7.0"]]
 
-  :dependencies [[org.clojure/clojure "1.11.3"]
+  :dependencies [[org.clojure/clojure "1.12.0"]
                  [cheshire "5.13.0"]
-                 [clj-commons/clj-yaml "1.0.27"]
                  [http-kit "2.8.0"]
-                 [nubank/clj-github-app "0.2.1"]
-                 [nubank/state-flow "5.17.0"]
+                 [nubank/clj-github-app "0.3.0"]
                  [clj-commons/fs "1.6.311"]
-                 [ring/ring-codec "1.2.0"]]
+                 [ring/ring-codec "1.2.0"]
+                 ; Optional dependency used by clj-github.token/hub-config
+                 [clj-commons/clj-yaml "1.0.29" :scope "provided"]
+                 ; Dependencies required by clj-github.test-helpers and clj-github.state-flow-helper.
+                 ; Must be provided by the user (typically only used in tests)
+                 [http-kit.fake "0.2.2" :scope "provided"]
+                 [nubank/state-flow "5.18.0" :scope "provided"]
+                 [dev.nubank/clj-github-mock "0.4.0" :scope "provided"]]
 
   :cljfmt {:indents {flow       [[:block 1]]
                      assoc-some [[:block 0]]}}
 
   :profiles {:dev {:plugins [[lein-project-version "0.1.0"]]
-                   :dependencies [[ch.qos.logback/logback-classic "1.3.0" :exclusions [com.sun.mail/javax.mail]]
-                                  [org.clojure/test.check "1.1.1"]
-                                  [nubank/matcher-combinators "3.9.1" :exclusions [mvxcvi/puget commons-codec]]
-                                  [tortue/spy "2.14.0"]
-                                  [http-kit.fake "0.2.2"]
-                                  [metosin/reitit-core "0.7.0"]
-                                  [dev.nubank/clj-github-mock "0.2.0"]]}}
+                   :dependencies [[ch.qos.logback/logback-classic "1.5.12"]
+                                  [nubank/matcher-combinators "3.9.1"]]}}
 
   :aliases {"coverage" ["cloverage" "-s" "coverage"]
             "lint"     ["do" ["cljfmt" "check"] ["nsorg"]]
