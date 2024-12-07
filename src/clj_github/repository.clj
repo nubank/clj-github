@@ -34,6 +34,22 @@
          nil
          (throw e))))))
 
+(defn- get-content*
+  "Returns the base64 encoded contents of a file"
+  [client org repo path ref branch]
+  (try
+    (-> (fetch-body! client (merge {:method :get
+                                    :path (format "/repos/%s/%s/contents/%s" org repo path)}
+                                   (cond
+                                     ref    {:query-params {"ref" ref}}
+                                     branch {:query-params {"branch" branch}}
+                                     :else  {})))
+        :content)
+    (catch ExceptionInfo e
+      (if (= 404 (-> (ex-data e) :response :status))
+        nil
+        (throw e)))))
+
 (defn get-content!
   "Returns the content of a text file from the repository default branch (usually `master`).
   An optional `:ref` parameter can be used to fetch content from a different commit/branch/tag.
@@ -44,19 +60,18 @@
   ([client org repo path]
    (get-content! client org repo path {}))
   ([client org repo path {:keys [ref branch]}]
-   (try
-     (-> (fetch-body! client (merge {:method :get
-                                     :path (format "/repos/%s/%s/contents/%s" org repo path)}
-                                    (cond
-                                      ref    {:query-params {"ref" ref}}
-                                      branch {:query-params {"branch" branch}}
-                                      :else  {})))
-         :content
-         base64-lines->string)
-     (catch ExceptionInfo e
-       (if (= 404 (-> (ex-data e) :response :status))
-         nil
-         (throw e))))))
+   (base64-lines->string (get-content* client org repo path ref branch))))
+
+(defn get-content-raw!
+  "Returns the bytes contents of a file from the repository default branch (usually `master`).
+  An optional `:ref` parameter can be used to fetch content from a different commit/branch/tag.
+  If the file does not exist, nil is returned.
+
+  Note: only works for blobs."
+  (^bytes [client org repo path]
+   (get-content-raw! client org repo path {}))
+  (^bytes [client org repo path {:keys [ref branch]}]
+   (base64-lines->bytes (get-content* client org repo path ref branch))))
 
 (defn get-repo!
   [client org repo]

@@ -54,6 +54,15 @@
       (or content
           (repository/get-content! client org repo path {:ref base-revision})))))
 
+(defn get-content-raw
+  "Returns the content of a file (as a byte array) for a given changeset."
+  ^bytes [{:keys [client org repo base-revision changes]} path]
+  (let [content (get changes path)]
+    (case content
+      ::deleted nil
+      (or content
+          (repository/get-content-raw! client org repo path {:ref base-revision})))))
+
 (defn put-content
   "Returns a new changeset with the file under path with new content.
   `content` can be a string or a byte-array.
