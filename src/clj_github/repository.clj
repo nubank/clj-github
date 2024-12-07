@@ -10,17 +10,11 @@
   (:import [clojure.lang ExceptionInfo]
            [java.util Base64]))
 
-(defn- base64->string
-  ([base64] (base64->string base64 (Base64/getDecoder)))
-  ([base64 decoder] (String. (.decode decoder ^String base64) "UTF-8")))
-
-(defn- split-lines [content]
-  (string/split content #"\r?\n" -1)) ; make sure we don't lose \n at the end of the string
+(defn- base64-lines->bytes ^bytes [^String content]
+  (.decode (Base64/getDecoder) (.replace content "\n" "")))
 
 (defn- base64-lines->string [content]
-  (->> (split-lines content)
-       (map base64->string)
-       (string/join)))
+  (String. (base64-lines->bytes content) "UTF-8"))
 
 (defn get-contents!
   "Returns the list of contents of a repository default branch (usually `master`).
