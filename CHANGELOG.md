@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.0
+
+- Fix decoding bug in `get-content!`
+- Add `get-content-raw` function that decodes file's content to a byte array
+- Support providing a token via `gh auth token`
+- Upgrade dependencies
+  - Upgrade nubank/clj-github-app from 0.2.1 to 0.3.0
+- Mark optional dependencies with scope provided
+  - clj-commons/clj-yaml
+  - http-kit.fake
+  - dev.nubank/clj-github-mock
+
 ## 0.6.5
 
 - Non-success status codes should not always result in a thrown exception
