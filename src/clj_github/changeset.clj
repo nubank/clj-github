@@ -85,8 +85,7 @@
   (#{::deleted} content))
 
 (defn- byte-array->base64
-  ([byte-array] (byte-array->base64 byte-array (Base64/getEncoder)))
-  ([byte-array encoder] (.encodeToString encoder byte-array)))
+  [byte-array] (.encodeToString (Base64/getEncoder) byte-array))
 
 (defn- content->sha-blob! [{:keys [client org repo]} content]
   (-> (repository/create-blob! client org repo {:content (byte-array->base64 content)
