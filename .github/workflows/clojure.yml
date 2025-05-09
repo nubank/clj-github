@@ -29,6 +29,14 @@ jobs:
         with:
           lein: 2.9.1
 
+      - name: Cache Clojure dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+          # List all files containing dependencies:
+          key: cljdeps-${{ hashFiles('project.clj') }}
+
       - name: Print Java version
         run: java -version
 
