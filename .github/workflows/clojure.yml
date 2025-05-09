@@ -24,7 +24,12 @@ jobs:
           distribution: temurin
           java-version: ${{ matrix.java-version }}
 
-      - name: Print java version
+      - name: Setup Clojure
+        uses: DeLaGuardo/setup-clojure@13.2
+        with:
+          lein: 2.9.1
+
+      - name: Print Java version
         run: java -version
 
       - name: Install dependencies
