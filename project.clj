@@ -24,7 +24,7 @@
                  ; Dependencies required by clj-github.test-helpers and clj-github.state-flow-helper.
                  ; Must be provided by the user (typically only used in tests)
                  [http-kit.fake "0.2.2" :scope "provided"]
-                 [nubank/state-flow "5.18.0" :scope "provided"]
+                 [nubank/state-flow "5.20.1" :scope "provided"]
                  [dev.nubank/clj-github-mock "0.4.0" :scope "provided"]]
 
   :cljfmt {:indents {flow       [[:block 1]]
