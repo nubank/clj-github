@@ -21,6 +21,19 @@ jobs:
           distribution: temurin
           java-version: ${{ matrix.java-version }}
 
+      - name: Setup Clojure
+        uses: DeLaGuardo/setup-clojure@13.2
+        with:
+          lein: 2.9.1
+
+      - name: Cache Clojure dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+          # List all files containing dependencies:
+          key: cljdeps-${{ hashFiles('project.clj') }}
+
       - name: Print java version
         run: java -version
 
