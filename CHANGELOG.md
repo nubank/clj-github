@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.0
+
+- Revise the `with-fake-github` macro to support all the options of the underlying `with-fake-http` macro
+
 ## 0.7.1
 
 - Fix decoding bug introduced in 0.7.0

@@ -1,9 +1,11 @@
 # clj-github
 
+[![Clojars Project](https://img.shields.io/clojars/v/dev.nubank/clj-github.svg)](https://clojars.org/dev.nubank/clj-github)
+[![cljdoc badge](https://cljdoc.org/badge/dev.nubank/clj-github)](https://cljdoc.org/d/dev.nubank/clj-github)
+
 A Clojure library for interacting with the GitHub REST API.
 
 ## Httpkit client
-
 
 *Example*:
 ```clojure
