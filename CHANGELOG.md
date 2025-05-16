@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.1
+
+- No actual change beyond correcting deployment scripts
+
 ## 0.8.0
 
 - Revise the `with-fake-github` macro to support all the options of the underlying `with-fake-http` macro
