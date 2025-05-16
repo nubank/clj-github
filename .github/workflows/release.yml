@@ -50,6 +50,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4.2.2
 
+    - name: Setup Clojure
+      uses: DeLaGuardo/setup-clojure@13.2
+      with:
+        lein: 2.9.1
+
     - name: Install dependencies
       run: lein deps
 
