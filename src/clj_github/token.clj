@@ -23,7 +23,7 @@
   Users must provide their own dependency on `clj-commons/clj-yaml`."
   (memoize
    (fn []
-     (some-> (io/file (System/getenv "HOME") ".config/hub")
+     (some-> (io/file (System/getProperty "user.home") ".config/hub")
              file-exists-or-nil
              (slurp)
              parse-yaml
