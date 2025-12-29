@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0
+
+- Add function to create releases for repositories
+
 ## 0.8.1
 
 - No actual change beyond correcting deployment scripts
