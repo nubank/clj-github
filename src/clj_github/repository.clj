@@ -246,3 +246,26 @@
                        :headers {"Accept" "application/vnd.github.v3+json"}
                        :method :post
                        :body body}))
+
+(defn create-release!
+  "Creates a new release for the repository. 
+   If the `tag_name` does not exist in the repository, GitHub will automatically create it.
+
+   Parameters:
+   - owner: The account owner of the repository (string).
+   - repo: The name of the repository (string).
+   - body: A map of parameters for the release
+      - :tag_name     - The name of the tag (e.g., \"v1.0.0\")
+      - :target_commitish       - The branch or SHA the tag is created from
+      - :name                   - The title of the release
+      - :body                   - Text describing the contents of the tag
+      - :draft                  - Boolean, true to create a draft (unpublished) release
+      - :prerelease             - Boolean, true to identify the release as a prerelease
+      - :generate_release_notes - Boolean, automatically generate the title and body
+   
+   For details about the parameters and response format, look at https://docs.github.com/en/rest/releases/releases#create-a-release"
+  [client owner repo body]
+  (fetch-body! client {:path (format "/repos/%s/%s/releases" owner repo)
+                       :headers {"Accept" "application/vnd.github.v3+json"}
+                       :method :post
+                       :body body}))
