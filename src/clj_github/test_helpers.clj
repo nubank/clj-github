@@ -24,7 +24,7 @@
 
    Do not call directly."
   [spec]
-  (into [(str github-url "app/installations") "{}"]
+  (into [(str github-url "/app/installations") "{}"]
         (mapcat (fn [[req resp]] [(request-spec req) (response-spec resp)]))
         (partition 2 spec)))
 
