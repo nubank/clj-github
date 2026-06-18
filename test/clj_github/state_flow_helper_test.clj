@@ -4,7 +4,6 @@
             [clj-github.state-flow-helper :as sfh]
             [clojure.test :refer [deftest is]]
             [matcher-combinators.test]
-            [state-flow.api :as flow]
             [state-flow.core :as state-flow]))
 
 (defn- init-system []
