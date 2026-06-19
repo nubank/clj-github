@@ -4,53 +4,29 @@
             [org.httpkit.fake :as fake])
   (:import (java.util.regex Pattern)))
 
-
-(defn- spec-type [spec]
+(defn- request-spec [request]
   (cond
-    (-> spec meta :path) :path
-    (string? spec) :string
-    (map? spec) :map
-    (instance? Pattern spec) :pattern
-    :else :form))
+    (string? request)                    (str github-url request)
+    (instance? Pattern request)          {:url request}
+    (and (map? request) (:path request)) (assoc request :url (str github-url (:path request)))
+    :else                                request))
 
-(defmulti spec-builder spec-type)
+(defn- response-spec [response]
+  (let [responder  (fake/responder response)
+        force-json #(assoc-in % [:headers :content-type] "application/json")]
+    (fn [orig-fn opts callback]
+      ((or callback identity)
+       (responder orig-fn opts force-json)))))
 
-(defmethod spec-builder :string [request]
-  (str github-url request))
+(defn ^:internal build-spec
+  "Converts a `with-fake-github`-style spec (a sequence of request/response
+   pairs) into a value suitable for `org.httpkit.fake/with-fake-http`.
 
-(defmethod spec-builder :map [request]
-  (if (:path request)
-    `(let [request# ~request
-           path#    (:path request#)]
-       (assoc request# :url (str github-url path#)))
-    request))
-
-(defmethod spec-builder :form [request]
-  request)
-
-(defmethod spec-builder :path [form]
-  `(spec-builder ~form))
-
-(defmethod spec-builder :pattern [pattern]
-  {:url pattern})
-
-(defn -add-default-content-type
-  [response]
-  (assoc-in response [:headers :content-type] "application/json"))
-
-(defn add-default-content-type [response]
-  `(let [responder# (fake/responder ~response)]
-     (fn [origin-fn# opts# callback#]
-       ((or callback# identity)
-        (responder# origin-fn# opts# -add-default-content-type)))))
-
-(defn build-spec [spec]
-  (reduce (fn [processed-fakes [request response]]
-            (-> processed-fakes
-                (conj (spec-builder request))
-                (conj (add-default-content-type response))))
-          [(str github-url "app/installations") "{}"]
-          (partition 2 spec)))
+   Do not call directly."
+  [spec]
+  (into [(str github-url "/app/installations") "{}"]
+        (mapcat (fn [[req resp]] [(request-spec req) (response-spec resp)]))
+        (partition 2 spec)))
 
 (defmacro with-fake-github
   "A wrapper around `with-fake-http` that sets up some defaults for GitHub access.
@@ -67,5 +43,6 @@
   However, the response Content-Type header is forced to \"application/json\", so the body (if provided)
   must be a JSON value encoded as string."
   [spec & body]
-  `(fake/with-fake-http ~(build-spec spec)
-                        ~@body))
+  `(fake/with-fake-http
+     (build-spec ~(mapv #(if (-> % meta :path) `{:path ~%} %) spec))
+     ~@body))

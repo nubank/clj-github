@@ -1,6 +1,0 @@
-apiVersion: workflows.dev/v1alpha1
-kind: TemplateInstance
-metadata:
-  namespace: pipelines
-spec:
-  templateName: moriarty-pr
