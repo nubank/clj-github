@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.1
+
+- Fix regression in `clj-github.test-helpers/build-spec`, restoring its behavior to pre-0.8.0 (return plain data, not quoted forms)
+- Fix bug in default `/app/installations` mock
+
 ## 0.9.0
 
 - Add function to create releases for repositories
