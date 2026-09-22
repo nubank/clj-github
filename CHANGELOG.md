@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0
+
+- Upgrade project dependencies (clojure, cheshire, http-kit, fs, ring-codec, clj-yaml)
+
 ## 0.9.1
 
 - Fix regression in `clj-github.test-helpers/build-spec`, restoring its behavior to pre-0.8.0 (return plain data, not quoted forms)
