@@ -13,14 +13,14 @@
             [lein-nsorg "0.3.0"]
             [lein-ancient "0.7.0"]]
 
-  :dependencies [[org.clojure/clojure "1.12.0"]
-                 [cheshire "5.13.0"]
-                 [http-kit "2.8.0"]
+  :dependencies [[org.clojure/clojure "1.12.6"]
+                 [cheshire "6.2.0"]
+                 [http-kit "2.8.1"]
                  [nubank/clj-github-app "0.3.0"]
-                 [clj-commons/fs "1.6.311"]
-                 [ring/ring-codec "1.2.0"]
+                 [clj-commons/fs "1.6.312"]
+                 [ring/ring-codec "1.3.0"]
                  ; Optional dependency used by clj-github.token/hub-config
-                 [clj-commons/clj-yaml "1.0.29" :scope "provided"]
+                 [clj-commons/clj-yaml "1.0.30" :scope "provided"]
                  ; Dependencies required by clj-github.test-helpers and clj-github.state-flow-helper.
                  ; Must be provided by the user (typically only used in tests)
                  [http-kit.fake "0.2.2" :scope "provided"]
@@ -31,8 +31,8 @@
                      assoc-some [[:block 0]]}}
 
   :profiles {:dev {:plugins [[lein-project-version "0.1.0"]]
-                   :dependencies [[ch.qos.logback/logback-classic "1.5.12"]
-                                  [nubank/matcher-combinators "3.9.1"]]}}
+                   :dependencies [[ch.qos.logback/logback-classic "1.6.3"]
+                                  [nubank/matcher-combinators "3.11.0"]]}}
 
   :aliases {"coverage" ["cloverage" "-s" "coverage"]
             "lint"     ["do" ["cljfmt" "check"] ["nsorg"]]
